@@ -7,7 +7,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:stackwallet/models/exchange/change_now/available_floating_rate_pair.dart';
 import 'package:stackwallet/models/exchange/change_now/currency.dart';
-import 'package:stackwallet/models/exchange/change_now/fixed_rate_market.dart';
 import 'package:stackwallet/models/exchange/incomplete_exchange.dart';
 import 'package:stackwallet/notifications/show_flush_bar.dart';
 import 'package:stackwallet/pages/exchange_view/exchange_coin_selection/fixed_rate_pair_coin_selection_view.dart';
@@ -24,6 +23,7 @@ import 'package:stackwallet/providers/exchange/exchange_send_from_wallet_id_prov
 import 'package:stackwallet/providers/exchange/fixed_rate_exchange_form_provider.dart';
 import 'package:stackwallet/providers/exchange/fixed_rate_market_pairs_provider.dart';
 import 'package:stackwallet/providers/providers.dart';
+import 'package:stackwallet/services/change_now/change_now.dart';
 import 'package:stackwallet/utilities/assets.dart';
 import 'package:stackwallet/utilities/cfcolors.dart';
 import 'package:stackwallet/utilities/enums/coin_enum.dart';
@@ -96,14 +96,14 @@ class _WalletInitiatedExchangeViewState
         ExchangeRateType.estimated) {
       await ref.read(estimatedRateExchangeFormProvider).swap();
     } else {
-      final from = ref.read(fixedRateExchangeFormProvider).market?.from;
-      final to = ref.read(fixedRateExchangeFormProvider).market?.to;
+      final from = ref.read(fixedRateExchangeFormProvider).market?.fromCurrency;
+      final to = ref.read(fixedRateExchangeFormProvider).market?.toCurrency;
 
       if (to != null && from != null) {
         final markets = ref
             .read(fixedRateMarketPairsStateProvider.state)
             .state
-            .where((e) => e.from == to && e.to == from);
+            .where((e) => e.fromCurrency == to && e.toCurrency == from);
 
         if (markets.isNotEmpty) {
           await ref.read(fixedRateExchangeFormProvider).swap(markets.first);
@@ -125,7 +125,7 @@ class _WalletInitiatedExchangeViewState
     _sendFocusNode.unfocus();
     _receiveFocusNode.unfocus();
 
-    List<AvailableFloatingRatePair> availablePairs = [];
+    List<AvailablePair> availablePairs = [];
     if (fromTicker.isEmpty ||
         fromTicker == "-" ||
         excludedTicker.isEmpty ||
@@ -136,23 +136,25 @@ class _WalletInitiatedExchangeViewState
       availablePairs = ref
           .read(availableFloatingRatePairsStateProvider.state)
           .state
-          .where((e) => e.fromTicker == excludedTicker)
+          .where((e) => e.fromCurrency == excludedTicker)
           .toList(growable: false);
     } else {
       availablePairs = ref
           .read(availableFloatingRatePairsStateProvider.state)
           .state
-          .where((e) => e.toTicker == excludedTicker)
+          .where((e) => e.toCurrency == excludedTicker)
           .toList(growable: false);
     }
 
     final List<Currency> tickers = currencies.where((e) {
       if (excludedTicker == fromTicker) {
         return e.ticker != excludedTicker &&
-            availablePairs.where((e2) => e2.toTicker == e.ticker).isNotEmpty;
+            availablePairs.where((e2) => e2.toCurrency == e.ticker).isNotEmpty;
       } else {
         return e.ticker != excludedTicker &&
-            availablePairs.where((e2) => e2.fromTicker == e.ticker).isNotEmpty;
+            availablePairs
+                .where((e2) => e2.fromCurrency == e.ticker)
+                .isNotEmpty;
       }
     }).toList(growable: false);
 
@@ -194,7 +196,7 @@ class _WalletInitiatedExchangeViewState
     _sendFocusNode.unfocus();
     _receiveFocusNode.unfocus();
 
-    List<FixedRateMarket> marketsThatPairWithExcludedTicker = [];
+    List<AvailablePair> marketsThatPairWithExcludedTicker = [];
 
     if (excludedTicker == "" ||
         excludedTicker == "-" ||
@@ -206,13 +208,17 @@ class _WalletInitiatedExchangeViewState
       marketsThatPairWithExcludedTicker = ref
           .read(fixedRateMarketPairsStateProvider.state)
           .state
-          .where((e) => e.from == excludedTicker && e.to != excludedTicker)
+          .where((e) =>
+              e.fromCurrency == excludedTicker &&
+              e.toCurrency != excludedTicker)
           .toList(growable: false);
     } else {
       marketsThatPairWithExcludedTicker = ref
           .read(fixedRateMarketPairsStateProvider.state)
           .state
-          .where((e) => e.to == excludedTicker && e.from != excludedTicker)
+          .where((e) =>
+              e.toCurrency == excludedTicker &&
+              e.fromCurrency != excludedTicker)
           .toList(growable: false);
     }
 
@@ -469,12 +475,12 @@ class _WalletInitiatedExchangeViewState
                                     final toTicker = ref
                                             .read(fixedRateExchangeFormProvider)
                                             .market
-                                            ?.to ??
+                                            ?.toCurrency ??
                                         "";
                                     final fromTicker = ref
                                             .read(fixedRateExchangeFormProvider)
                                             .market
-                                            ?.from ??
+                                            ?.fromCurrency ??
                                         "";
 
                                     if (fromTicker.toLowerCase() ==
@@ -494,8 +500,8 @@ class _WalletInitiatedExchangeViewState
                                               .state
                                               .firstWhere(
                                                 (e) =>
-                                                    e.to == toTicker &&
-                                                    e.from ==
+                                                    e.toCurrency == toTicker &&
+                                                    e.fromCurrency ==
                                                         selectedFromTicker,
                                               );
 
@@ -545,12 +551,11 @@ class _WalletInitiatedExchangeViewState
                                                                 value.from))
                                                     ?.image;
                                               } else {
-                                                image = _fetchIconUrlFromTickerForFixedRateFlow(
-                                                    ref.watch(
-                                                        fixedRateExchangeFormProvider
-                                                            .select((value) =>
-                                                                value.market
-                                                                    ?.from)));
+                                                image = _fetchIconUrlFromTickerForFixedRateFlow(ref.watch(
+                                                    fixedRateExchangeFormProvider
+                                                        .select((value) => value
+                                                            .market
+                                                            ?.fromCurrency)));
                                               }
                                               if (image != null &&
                                                   image.isNotEmpty) {
@@ -617,7 +622,8 @@ class _WalletInitiatedExchangeViewState
                                               : ref.watch(
                                                       fixedRateExchangeFormProvider
                                                           .select((value) => value
-                                                              .market?.from
+                                                              .market
+                                                              ?.fromCurrency
                                                               .toUpperCase())) ??
                                                   "-",
                                           style:
@@ -638,9 +644,9 @@ class _WalletInitiatedExchangeViewState
                                                   "-"
                                               : ref.watch(
                                                       fixedRateExchangeFormProvider
-                                                          .select((value) =>
-                                                              value.market
-                                                                  ?.from)) ??
+                                                          .select((value) => value
+                                                              .market
+                                                              ?.fromCurrency)) ??
                                                   "-";
                                           if (ticker.toLowerCase() ==
                                               coin.ticker.toLowerCase()) {
@@ -826,12 +832,12 @@ class _WalletInitiatedExchangeViewState
                                     final fromTicker = ref
                                             .read(fixedRateExchangeFormProvider)
                                             .market
-                                            ?.from ??
+                                            ?.fromCurrency ??
                                         "";
                                     final toTicker = ref
                                             .read(fixedRateExchangeFormProvider)
                                             .market
-                                            ?.to ??
+                                            ?.toCurrency ??
                                         "";
                                     if (toTicker.toLowerCase() ==
                                         coin.ticker.toLowerCase()) {
@@ -850,8 +856,10 @@ class _WalletInitiatedExchangeViewState
                                               .state
                                               .firstWhere(
                                                 (e) =>
-                                                    e.to == selectedToTicker &&
-                                                    e.from == fromTicker,
+                                                    e.toCurrency ==
+                                                        selectedToTicker &&
+                                                    e.fromCurrency ==
+                                                        fromTicker,
                                               );
 
                                           await ref
@@ -903,9 +911,9 @@ class _WalletInitiatedExchangeViewState
                                                 image = _fetchIconUrlFromTickerForFixedRateFlow(
                                                     ref.watch(
                                                         fixedRateExchangeFormProvider
-                                                            .select((value) =>
-                                                                value.market
-                                                                    ?.to)));
+                                                            .select((value) => value
+                                                                .market
+                                                                ?.toCurrency)));
                                               }
                                               if (image != null &&
                                                   image.isNotEmpty) {
@@ -970,7 +978,8 @@ class _WalletInitiatedExchangeViewState
                                               : ref.watch(
                                                       fixedRateExchangeFormProvider
                                                           .select((value) => value
-                                                              .market?.to
+                                                              .market
+                                                              ?.toCurrency
                                                               .toUpperCase())) ??
                                                   "-",
                                           style:
@@ -991,9 +1000,9 @@ class _WalletInitiatedExchangeViewState
                                                   "-"
                                               : ref.watch(
                                                       fixedRateExchangeFormProvider
-                                                          .select((value) =>
-                                                              value.market
-                                                                  ?.to)) ??
+                                                          .select((value) => value
+                                                              .market
+                                                              ?.toCurrency)) ??
                                                   "-";
                                           if (ticker.toLowerCase() ==
                                               coin.ticker.toLowerCase()) {
@@ -1049,8 +1058,8 @@ class _WalletInitiatedExchangeViewState
                                 final market = ref
                                     .read(fixedRateExchangeFormProvider)
                                     .market;
-                                final fromTicker = market?.from ?? "";
-                                final toTicker = market?.to ?? "";
+                                final fromTicker = market?.fromCurrency ?? "";
+                                final toTicker = market?.toCurrency ?? "";
                                 if (!(fromTicker.isEmpty ||
                                     toTicker.isEmpty ||
                                     toTicker == "-" ||
@@ -1061,8 +1070,8 @@ class _WalletInitiatedExchangeViewState
                                               .state)
                                       .state
                                       .where((e) =>
-                                          e.toTicker == toTicker &&
-                                          e.fromTicker == fromTicker);
+                                          e.toCurrency == toTicker &&
+                                          e.toCurrency == fromTicker);
                                   if (available.isNotEmpty) {
                                     final availableCurrencies = ref
                                         .read(
@@ -1113,15 +1122,15 @@ class _WalletInitiatedExchangeViewState
                                     toTicker.isEmpty ||
                                     toTicker == "-" ||
                                     fromTicker == "-")) {
-                                  FixedRateMarket? market;
+                                  AvailablePair? market;
                                   try {
                                     market = ref
                                         .read(fixedRateMarketPairsStateProvider
                                             .state)
                                         .state
                                         .firstWhere((e) =>
-                                            e.from == fromTicker &&
-                                            e.to == toTicker);
+                                            e.fromCurrency == fromTicker &&
+                                            e.toCurrency == toTicker);
                                   } catch (_) {
                                     market = null;
                                   }
@@ -1199,7 +1208,7 @@ class _WalletInitiatedExchangeViewState
                                               .read(
                                                   fixedRateExchangeFormProvider)
                                               .market
-                                              ?.from ??
+                                              ?.fromCurrency ??
                                           "";
 
                                   final manager = ref
@@ -1280,8 +1289,8 @@ class _WalletInitiatedExchangeViewState
                                                 .state)
                                         .state;
                                     for (final pair in availableFloatingPairs) {
-                                      if (pair.fromTicker == fromTicker &&
-                                          pair.toTicker == toTicker) {
+                                      if (pair.fromCurrency == fromTicker &&
+                                          pair.toCurrency == toTicker) {
                                         isAvailable = true;
                                         break;
                                       }
@@ -1310,7 +1319,9 @@ class _WalletInitiatedExchangeViewState
                                         .getEstimatedExchangeAmount(
                                           fromTicker: fromTicker,
                                           toTicker: toTicker,
-                                          fromAmount: sendAmount,
+                                          amount: sendAmount,
+                                          fromOrTo: CNEstimateType.direct,
+                                          flow: CNFlowType.standard,
                                         );
 
                                     if (response.value == null) {
@@ -1328,17 +1339,17 @@ class _WalletInitiatedExchangeViewState
                                     }
 
                                     String rate =
-                                        "1 ${fromTicker.toUpperCase()} ~${(response.value!.estimatedAmount / sendAmount).toDecimal(scaleOnInfinitePrecision: 8).toStringAsFixed(8)} ${toTicker.toUpperCase()}";
+                                        "1 ${fromTicker.toUpperCase()} ~${(response.value!.toAmount! / sendAmount).toDecimal(scaleOnInfinitePrecision: 8).toStringAsFixed(8)} ${toTicker.toUpperCase()}";
 
                                     final model = IncompleteExchangeModel(
                                       sendTicker: fromTicker.toUpperCase(),
                                       receiveTicker: toTicker.toUpperCase(),
                                       rateInfo: rate,
                                       sendAmount: sendAmount,
-                                      receiveAmount:
-                                          response.value!.estimatedAmount,
+                                      receiveAmount: response.value!.toAmount!,
                                       rateId: response.value!.rateId,
                                       rateType: rateType,
+                                      type: CNEstimateType.direct,
                                     );
 
                                     if (mounted) {
@@ -1356,12 +1367,12 @@ class _WalletInitiatedExchangeViewState
                                     final fromTicker = ref
                                             .read(fixedRateExchangeFormProvider)
                                             .market
-                                            ?.from ??
+                                            ?.fromCurrency ??
                                         "";
                                     final toTicker = ref
                                             .read(fixedRateExchangeFormProvider)
                                             .market
-                                            ?.to ??
+                                            ?.toCurrency ??
                                         "";
 
                                     final sendAmount = Decimal.parse(ref
@@ -1374,11 +1385,12 @@ class _WalletInitiatedExchangeViewState
 
                                     final response = await ref
                                         .read(changeNowProvider)
-                                        .getEstimatedFixedRateExchangeAmount(
+                                        .getEstimatedExchangeAmount(
                                           fromTicker: fromTicker,
                                           toTicker: toTicker,
-                                          fromAmount: sendAmount,
-                                          useRateId: true,
+                                          amount: sendAmount,
+                                          fromOrTo: CNEstimateType.direct,
+                                          flow: CNFlowType.fixedRate,
                                         );
 
                                     bool? shouldCancel;
@@ -1455,18 +1467,21 @@ class _WalletInitiatedExchangeViewState
                                       return;
                                     }
 
+                                    // String rate =
+                                    //     "1 $fromTicker ~${ref.read(fixedRateExchangeFormProvider).market!.rate.toStringAsFixed(8)} $toTicker";
+
                                     String rate =
-                                        "1 $fromTicker ~${ref.read(fixedRateExchangeFormProvider).market!.rate.toStringAsFixed(8)} $toTicker";
+                                        "1 ${fromTicker.toUpperCase()} ~${(response.value!.toAmount! / sendAmount).toDecimal(scaleOnInfinitePrecision: 8).toStringAsFixed(8)} ${toTicker.toUpperCase()}";
 
                                     final model = IncompleteExchangeModel(
                                       sendTicker: fromTicker,
                                       receiveTicker: toTicker,
                                       rateInfo: rate,
                                       sendAmount: sendAmount,
-                                      receiveAmount:
-                                          response.value!.estimatedAmount,
+                                      receiveAmount: response.value!.toAmount!,
                                       rateId: response.value!.rateId,
                                       rateType: rateType,
+                                      type: CNEstimateType.direct,
                                     );
 
                                     if (mounted) {

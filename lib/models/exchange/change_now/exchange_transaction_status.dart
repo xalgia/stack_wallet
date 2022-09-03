@@ -186,12 +186,12 @@ class ExchangeTransactionStatus {
         toCurrency: json["toCurrency"] as String? ?? "",
         id: json["id"] as String,
         updatedAt: json["updatedAt"] as String? ?? "",
-        expectedSendAmountDecimal: json["expectedSendAmount"] == null
+        expectedSendAmountDecimal: json["expectedAmountFrom"] == null
             ? ""
-            : json["expectedSendAmount"].toString(),
-        expectedReceiveAmountDecimal: json["expectedReceiveAmount"] == null
+            : json["expectedAmountFrom"].toString(),
+        expectedReceiveAmountDecimal: json["expectedAmountTo"] == null
             ? ""
-            : json["expectedReceiveAmount"].toString(),
+            : json["expectedAmountTo"].toString(),
         createdAt: json["createdAt"] as String? ?? "",
         isPartner: json["isPartner"] as bool,
         depositReceivedAt: json["depositReceivedAt"] as String? ?? "",
@@ -202,10 +202,9 @@ class ExchangeTransactionStatus {
         payinExtraId: json["payinExtraId"] as String? ?? "",
         payoutExtraId: json["payoutExtraId"] as String? ?? "",
         amountSendDecimal:
-            json["amountSend"] == null ? "" : json["amountSend"].toString(),
-        amountReceiveDecimal: json["amountReceive"] == null
-            ? ""
-            : json["amountReceive"].toString(),
+            json["amountFrom"] == null ? "" : json["amountFrom"].toString(),
+        amountReceiveDecimal:
+            json["amountTo"] == null ? "" : json["amountTo"].toString(),
         tokensDestination: json["tokensDestination"] as String? ?? "",
         refundAddress: json["refundAddress"] as String? ?? "",
         refundExtraId: json["refundExtraId"] as String? ?? "",

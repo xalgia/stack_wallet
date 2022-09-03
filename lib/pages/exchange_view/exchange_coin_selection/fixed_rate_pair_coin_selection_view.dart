@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:stackwallet/models/exchange/change_now/available_floating_rate_pair.dart';
 import 'package:stackwallet/models/exchange/change_now/currency.dart';
-import 'package:stackwallet/models/exchange/change_now/fixed_rate_market.dart';
 import 'package:stackwallet/utilities/assets.dart';
 import 'package:stackwallet/utilities/cfcolors.dart';
 import 'package:stackwallet/utilities/constants.dart';
@@ -24,7 +24,7 @@ class FixedRateMarketPairCoinSelectionView extends ConsumerStatefulWidget {
     required this.isFrom,
   }) : super(key: key);
 
-  final List<FixedRateMarket> markets;
+  final List<AvailablePair> markets;
   final List<Currency> currencies;
   final bool isFrom;
 
@@ -38,8 +38,8 @@ class _FixedRateMarketPairCoinSelectionViewState
   late TextEditingController _searchController;
   final _searchFocusNode = FocusNode();
 
-  late final List<FixedRateMarket> markets;
-  late List<FixedRateMarket> _markets;
+  late final List<AvailablePair> markets;
+  late List<AvailablePair> _markets;
 
   late final bool isFrom;
 
@@ -57,7 +57,7 @@ class _FixedRateMarketPairCoinSelectionViewState
     setState(() {
       _markets = [
         ...markets.where((e) {
-          final String ticker = isFrom ? e.from : e.to;
+          final String ticker = isFrom ? e.fromCurrency : e.toCurrency;
           final __currencies = widget.currencies
               .where((e) => e.ticker.toLowerCase() == ticker.toLowerCase());
           if (__currencies.isNotEmpty) {
@@ -80,11 +80,13 @@ class _FixedRateMarketPairCoinSelectionViewState
     markets = [...widget.markets];
     if (isFrom) {
       markets.sort(
-        (a, b) => a.from.toLowerCase().compareTo(b.from.toLowerCase()),
+        (a, b) => a.fromCurrency
+            .toLowerCase()
+            .compareTo(b.fromCurrency.toLowerCase()),
       );
       for (Coin coin in Coin.values.reversed) {
         int index = markets.indexWhere((element) =>
-            element.from.toLowerCase() == coin.ticker.toLowerCase());
+            element.fromCurrency.toLowerCase() == coin.ticker.toLowerCase());
         if (index > 0) {
           final market = markets.removeAt(index);
           markets.insert(0, market);
@@ -92,11 +94,12 @@ class _FixedRateMarketPairCoinSelectionViewState
       }
     } else {
       markets.sort(
-        (a, b) => a.to.toLowerCase().compareTo(b.to.toLowerCase()),
+        (a, b) =>
+            a.toCurrency.toLowerCase().compareTo(b.toCurrency.toLowerCase()),
       );
       for (Coin coin in Coin.values.reversed) {
-        int index = markets.indexWhere(
-            (element) => element.to.toLowerCase() == coin.ticker.toLowerCase());
+        int index = markets.indexWhere((element) =>
+            element.toCurrency.toLowerCase() == coin.ticker.toLowerCase());
         if (index > 0) {
           final market = markets.removeAt(index);
           markets.insert(0, market);
@@ -208,7 +211,9 @@ class _FixedRateMarketPairCoinSelectionViewState
                   .where((e) => Coin.values
                       .where((coin) =>
                           coin.ticker.toLowerCase() ==
-                          (isFrom ? e.from.toLowerCase() : e.to.toLowerCase()))
+                          (isFrom
+                              ? e.fromCurrency.toLowerCase()
+                              : e.toCurrency.toLowerCase()))
                       .isNotEmpty)
                   .toList(growable: false);
 
@@ -218,8 +223,9 @@ class _FixedRateMarketPairCoinSelectionViewState
                   shrinkWrap: true,
                   itemCount: items.length,
                   itemBuilder: (builderContext, index) {
-                    final String ticker =
-                        isFrom ? items[index].from : items[index].to;
+                    final String ticker = isFrom
+                        ? items[index].fromCurrency
+                        : items[index].toCurrency;
 
                     final tuple = _imageUrlAndNameFor(ticker);
                     return Padding(
@@ -275,8 +281,9 @@ class _FixedRateMarketPairCoinSelectionViewState
                   shrinkWrap: true,
                   itemCount: _markets.length,
                   itemBuilder: (builderContext, index) {
-                    final String ticker =
-                        isFrom ? _markets[index].from : _markets[index].to;
+                    final String ticker = isFrom
+                        ? _markets[index].fromCurrency
+                        : _markets[index].toCurrency;
 
                     final tuple = _imageUrlAndNameFor(ticker);
                     return Padding(

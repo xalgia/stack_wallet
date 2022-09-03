@@ -1,16 +1,16 @@
 import 'package:decimal/decimal.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:stackwallet/models/exchange/change_now/fixed_rate_market.dart';
+import 'package:stackwallet/models/exchange/change_now/available_floating_rate_pair.dart';
 
 class FixedRateExchangeFormState extends ChangeNotifier {
   Decimal? _fromAmount;
   Decimal? _toAmount;
 
-  FixedRateMarket? _market;
+  AvailablePair? _market;
 
-  FixedRateMarket? get market => _market;
+  AvailablePair? get market => _market;
 
-  Future<void> swap(FixedRateMarket reverseFixedRateMarket) async {
+  Future<void> swap(AvailablePair reverseFixedRateMarket) async {
     final Decimal? tmp = _fromAmount;
     _fromAmount = _toAmount;
     _toAmount = tmp;
@@ -24,7 +24,7 @@ class FixedRateExchangeFormState extends ChangeNotifier {
       _toAmount == null ? "-" : _toAmount!.toStringAsFixed(8);
 
   Future<void> updateMarket(
-    FixedRateMarket? market,
+    AvailablePair? market,
     bool shouldNotifyListeners,
   ) async {
     _market = market;
@@ -37,7 +37,7 @@ class FixedRateExchangeFormState extends ChangeNotifier {
         if (_fromAmount! <= Decimal.zero) {
           _toAmount = Decimal.zero;
         } else {
-          _toAmount = (_fromAmount! * _market!.rate) - _market!.minerFee;
+          // _toAmount = (_fromAmount! * _market!.rate) - _market!.minerFee;
         }
       }
     }
@@ -48,11 +48,11 @@ class FixedRateExchangeFormState extends ChangeNotifier {
   }
 
   String get rateDisplayString {
-    if (_market == null) {
-      return "N/A";
-    } else {
-      return "1 ${_market!.from.toUpperCase()} ~${_market!.rate.toStringAsFixed(8)} ${_market!.to.toUpperCase()}";
-    }
+    // if (_market == null) {
+    return "N/A";
+    // } else {
+    //   return "1 ${_market!.from.toUpperCase()} ~${_market!.rate.toStringAsFixed(8)} ${_market!.toCurrency.toUpperCase()}";
+    // }
   }
 
   bool get canExchange {
@@ -64,11 +64,11 @@ class FixedRateExchangeFormState extends ChangeNotifier {
 
   String get sendAmountWarning {
     if (_market != null && _fromAmount != null) {
-      if (_fromAmount! < _market!.min) {
-        return "Minimum amount ${_market!.min.toString()} ${_market!.from.toUpperCase()}";
-      } else if (_fromAmount! > _market!.max) {
-        return "Maximum amount ${_market!.max.toString()} ${_market!.from.toUpperCase()}";
-      }
+      // if (_fromAmount! < _market!.min) {
+      //   return "Minimum amount ${_market!.min.toString()} ${_market!.from.toUpperCase()}";
+      // } else if (_fromAmount! > _market!.max) {
+      //   return "Maximum amount ${_market!.max.toString()} ${_market!.from.toUpperCase()}";
+      // }
     }
 
     return "";
@@ -79,9 +79,9 @@ class FixedRateExchangeFormState extends ChangeNotifier {
     bool shouldNotifyListeners,
   ) async {
     if (_market != null) {
-      _fromAmount = (newToAmount / _market!.rate)
-              .toDecimal(scaleOnInfinitePrecision: 12) +
-          _market!.minerFee;
+      // _fromAmount = (newToAmount / _market!.rate)
+      //         .toDecimal(scaleOnInfinitePrecision: 12) +
+      //     _market!.minerFee;
     }
 
     _toAmount = newToAmount;
@@ -95,7 +95,7 @@ class FixedRateExchangeFormState extends ChangeNotifier {
     bool shouldNotifyListeners,
   ) async {
     if (_market != null) {
-      _toAmount = (newFromAmount * _market!.rate) - _market!.minerFee;
+      // _toAmount = (newFromAmount * _market!.rate) - _market!.minerFee;
     }
 
     _fromAmount = newFromAmount;

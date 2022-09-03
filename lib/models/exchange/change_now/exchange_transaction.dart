@@ -92,7 +92,7 @@ class ExchangeTransaction {
         payoutExtraId: json["payoutExtraId"] as String? ?? "",
         fromCurrency: json["fromCurrency"] as String,
         toCurrency: json["toCurrency"] as String,
-        amount: Decimal.parse(json["amount"].toString()).toStringAsFixed(12),
+        amount: Decimal.parse(json["toAmount"].toString()).toStringAsFixed(12),
         refundAddress: json["refundAddress"] as String? ?? "",
         refundExtraId: json["refundExtraId"] as String? ?? "",
         payoutExtraIdName: json["payoutExtraIdName"] as String? ?? "",

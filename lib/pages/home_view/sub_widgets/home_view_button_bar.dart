@@ -10,6 +10,7 @@ import 'package:stackwallet/providers/exchange/estimate_rate_exchange_form_provi
 import 'package:stackwallet/providers/exchange/fixed_rate_exchange_form_provider.dart';
 import 'package:stackwallet/providers/exchange/fixed_rate_market_pairs_provider.dart';
 import 'package:stackwallet/providers/providers.dart';
+import 'package:stackwallet/services/change_now/change_now.dart';
 import 'package:stackwallet/utilities/cfcolors.dart';
 import 'package:stackwallet/utilities/logger.dart';
 import 'package:stackwallet/utilities/text_styles.dart';
@@ -43,9 +44,12 @@ class _HomeViewButtonBarState extends ConsumerState<HomeViewButtonBar> {
     BuildContext context,
     WidgetRef ref,
   ) async {
-    final response = await ref.read(changeNowProvider).getAvailableCurrencies();
-    final response2 =
-        await ref.read(changeNowProvider).getAvailableFloatingRatePairs();
+    final response = await ref
+        .read(changeNowProvider)
+        .getAvailableCurrencies(flow: CNFlowType.standard);
+    final response2 = await ref
+        .read(changeNowProvider)
+        .getAvailablePairs(flow: CNFlowType.standard);
     if (response.value != null && response2.value != null) {
       ref.read(availableChangeNowCurrenciesStateProvider.state).state =
           response.value!;
@@ -89,16 +93,17 @@ class _HomeViewButtonBarState extends ConsumerState<HomeViewButtonBar> {
     BuildContext context,
     WidgetRef ref,
   ) async {
-    final response3 =
-        await ref.read(changeNowProvider).getAvailableFixedRateMarkets();
+    final response3 = await ref
+        .read(changeNowProvider)
+        .getAvailablePairs(flow: CNFlowType.fixedRate);
 
     if (response3.value != null) {
       ref.read(fixedRateMarketPairsStateProvider.state).state =
           response3.value!;
 
       if (ref.read(fixedRateExchangeFormProvider).market == null) {
-        final matchingMarkets =
-            response3.value!.where((e) => e.to == "doge" && e.from == "btc");
+        final matchingMarkets = response3.value!
+            .where((e) => e.toCurrency == "doge" && e.fromCurrency == "btc");
 
         if (matchingMarkets.isNotEmpty) {
           await ref

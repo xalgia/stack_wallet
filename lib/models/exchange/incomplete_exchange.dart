@@ -1,6 +1,7 @@
 import 'package:decimal/decimal.dart';
 import 'package:stackwallet/models/exchange/change_now/exchange_transaction.dart';
 import 'package:stackwallet/pages/exchange_view/sub_widgets/exchange_rate_sheet.dart';
+import 'package:stackwallet/services/change_now/change_now.dart';
 
 class IncompleteExchangeModel {
   final String sendTicker;
@@ -20,6 +21,8 @@ class IncompleteExchangeModel {
 
   ExchangeTransaction? trade;
 
+  final CNEstimateType type;
+
   IncompleteExchangeModel({
     required this.sendTicker,
     required this.receiveTicker,
@@ -27,6 +30,7 @@ class IncompleteExchangeModel {
     required this.sendAmount,
     required this.receiveAmount,
     required this.rateType,
+    required this.type,
     this.rateId,
   });
 }

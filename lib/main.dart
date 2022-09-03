@@ -42,6 +42,7 @@ import 'package:stackwallet/providers/global/base_currencies_provider.dart';
 import 'package:stackwallet/providers/global/trades_service_provider.dart';
 import 'package:stackwallet/providers/providers.dart';
 import 'package:stackwallet/route_generator.dart';
+import 'package:stackwallet/services/change_now/change_now.dart';
 import 'package:stackwallet/services/debug_service.dart';
 import 'package:stackwallet/services/locale_service.dart';
 import 'package:stackwallet/services/node_service.dart';
@@ -239,9 +240,13 @@ class _MaterialAppWithThemeState extends ConsumerState<MaterialAppWithTheme>
             .isNotEmpty) {
       return;
     }
-    final response = await ref.read(changeNowProvider).getAvailableCurrencies();
-    final response2 =
-        await ref.read(changeNowProvider).getAvailableFloatingRatePairs();
+    final response = await ref
+        .read(changeNowProvider)
+        .getAvailableCurrencies(flow: CNFlowType.standard);
+    final response2 = await ref
+        .read(changeNowProvider)
+        .getAvailablePairs(flow: CNFlowType.standard);
+
     if (response.value != null) {
       ref.read(availableChangeNowCurrenciesStateProvider.state).state =
           response.value!;
@@ -292,15 +297,17 @@ class _MaterialAppWithThemeState extends ConsumerState<MaterialAppWithTheme>
       return;
     }
 
-    final response3 =
-        await ref.read(changeNowProvider).getAvailableFixedRateMarkets();
+    final response3 = await ref
+        .read(changeNowProvider)
+        .getAvailablePairs(flow: CNFlowType.fixedRate);
+
     if (response3.value != null) {
       ref.read(fixedRateMarketPairsStateProvider.state).state =
           response3.value!;
 
       if (ref.read(fixedRateExchangeFormProvider).market == null) {
-        final matchingMarkets =
-            response3.value!.where((e) => e.to == "doge" && e.from == "btc");
+        final matchingMarkets = response3.value!
+            .where((e) => e.toCurrency == "doge" && e.fromCurrency == "btc");
         if (matchingMarkets.isNotEmpty) {
           await ref
               .read(fixedRateExchangeFormProvider)

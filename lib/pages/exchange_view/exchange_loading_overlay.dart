@@ -5,8 +5,7 @@ import 'package:stackwallet/providers/exchange/available_floating_rate_pairs_sta
 import 'package:stackwallet/providers/exchange/change_now_provider.dart';
 import 'package:stackwallet/providers/exchange/changenow_initial_load_status.dart';
 import 'package:stackwallet/providers/exchange/estimate_rate_exchange_form_provider.dart';
-import 'package:stackwallet/providers/exchange/fixed_rate_exchange_form_provider.dart';
-import 'package:stackwallet/providers/exchange/fixed_rate_market_pairs_provider.dart';
+import 'package:stackwallet/services/change_now/change_now.dart';
 import 'package:stackwallet/utilities/cfcolors.dart';
 import 'package:stackwallet/utilities/logger.dart';
 import 'package:stackwallet/utilities/text_styles.dart';
@@ -38,30 +37,32 @@ class _ExchangeLoadingOverlayViewState
     ref.read(changeNowFixedInitialLoadStatusStateProvider.state).state =
         ChangeNowLoadStatus.loading;
 
-    final response3 =
-        await ref.read(changeNowProvider).getAvailableFixedRateMarkets();
-    if (response3.value != null) {
-      ref.read(fixedRateMarketPairsStateProvider.state).state =
-          response3.value!;
+    final response3 = await ref
+        .read(changeNowProvider)
+        .getAvailablePairs(flow: CNFlowType.fixedRate);
 
-      if (ref.read(fixedRateExchangeFormProvider).market == null) {
-        final matchingMarkets =
-            response3.value!.where((e) => e.to == "doge" && e.from == "btc");
-        if (matchingMarkets.isNotEmpty) {
-          await ref
-              .read(fixedRateExchangeFormProvider)
-              .updateMarket(matchingMarkets.first, true);
-        }
-      }
-    } else {
-      Logging.instance.log(
-          "Failed to load changeNOW fixed rate markets: ${response3.exception?.errorMessage}",
-          level: LogLevel.Error);
-
-      ref.read(changeNowFixedInitialLoadStatusStateProvider.state).state =
-          ChangeNowLoadStatus.failed;
-      return;
-    }
+    // if (response3.value != null) {
+    //   ref.read(fixedRateMarketPairsStateProvider.state).state =
+    //       response3.value!;
+    //
+    //   if (ref.read(fixedRateExchangeFormProvider).market == null) {
+    //     final matchingMarkets = response3.value!
+    //         .where((e) => e.toCurrency == "doge" && e.fromCurrency == "btc");
+    //     if (matchingMarkets.isNotEmpty) {
+    //       await ref
+    //           .read(fixedRateExchangeFormProvider)
+    //           .updateMarket(matchingMarkets.first, true);
+    //     }
+    //   }
+    // } else {
+    //   Logging.instance.log(
+    //       "Failed to load changeNOW fixed rate markets: ${response3.exception?.errorMessage}",
+    //       level: LogLevel.Error);
+    //
+    //   ref.read(changeNowFixedInitialLoadStatusStateProvider.state).state =
+    //       ChangeNowLoadStatus.failed;
+    //   return;
+    // }
 
     ref.read(changeNowFixedInitialLoadStatusStateProvider.state).state =
         ChangeNowLoadStatus.success;
@@ -79,9 +80,13 @@ class _ExchangeLoadingOverlayViewState
     ref.read(changeNowEstimatedInitialLoadStatusStateProvider.state).state =
         ChangeNowLoadStatus.loading;
 
-    final response = await ref.read(changeNowProvider).getAvailableCurrencies();
-    final response2 =
-        await ref.read(changeNowProvider).getAvailableFloatingRatePairs();
+    final response = await ref
+        .read(changeNowProvider)
+        .getAvailableCurrencies(flow: CNFlowType.standard);
+    final response2 = await ref
+        .read(changeNowProvider)
+        .getAvailablePairs(flow: CNFlowType.standard);
+
     if (response.value != null) {
       ref.read(availableChangeNowCurrenciesStateProvider.state).state =
           response.value!;

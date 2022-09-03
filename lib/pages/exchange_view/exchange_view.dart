@@ -8,7 +8,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:stackwallet/models/exchange/change_now/available_floating_rate_pair.dart';
 import 'package:stackwallet/models/exchange/change_now/currency.dart';
-import 'package:stackwallet/models/exchange/change_now/fixed_rate_market.dart';
 import 'package:stackwallet/models/exchange/incomplete_exchange.dart';
 import 'package:stackwallet/notifications/show_flush_bar.dart';
 import 'package:stackwallet/pages/exchange_view/exchange_coin_selection/fixed_rate_pair_coin_selection_view.dart';
@@ -27,6 +26,7 @@ import 'package:stackwallet/providers/exchange/fixed_rate_market_pairs_provider.
 import 'package:stackwallet/providers/exchange/trade_sent_from_stack_lookup_provider.dart';
 import 'package:stackwallet/providers/global/trades_service_provider.dart';
 import 'package:stackwallet/providers/providers.dart';
+import 'package:stackwallet/services/change_now/change_now.dart';
 import 'package:stackwallet/utilities/assets.dart';
 import 'package:stackwallet/utilities/cfcolors.dart';
 import 'package:stackwallet/utilities/constants.dart';
@@ -80,14 +80,14 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
         ExchangeRateType.estimated) {
       await ref.read(estimatedRateExchangeFormProvider).swap();
     } else {
-      final from = ref.read(fixedRateExchangeFormProvider).market?.from;
-      final to = ref.read(fixedRateExchangeFormProvider).market?.to;
+      final from = ref.read(fixedRateExchangeFormProvider).market?.fromCurrency;
+      final to = ref.read(fixedRateExchangeFormProvider).market?.toCurrency;
 
       if (to != null && from != null) {
         final markets = ref
             .read(fixedRateMarketPairsStateProvider.state)
             .state
-            .where((e) => e.from == to && e.to == from);
+            .where((e) => e.fromCurrency == to && e.toCurrency == from);
 
         if (markets.isNotEmpty) {
           await ref.read(fixedRateExchangeFormProvider).swap(markets.first);
@@ -109,7 +109,7 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
     _sendFocusNode.unfocus();
     _receiveFocusNode.unfocus();
 
-    List<AvailableFloatingRatePair> availablePairs = [];
+    List<AvailablePair> availablePairs = [];
     if (fromTicker.isEmpty ||
         fromTicker == "-" ||
         excludedTicker.isEmpty ||
@@ -120,23 +120,25 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
       availablePairs = ref
           .read(availableFloatingRatePairsStateProvider.state)
           .state
-          .where((e) => e.fromTicker == excludedTicker)
+          .where((e) => e.fromCurrency == excludedTicker)
           .toList(growable: false);
     } else {
       availablePairs = ref
           .read(availableFloatingRatePairsStateProvider.state)
           .state
-          .where((e) => e.toTicker == excludedTicker)
+          .where((e) => e.toCurrency == excludedTicker)
           .toList(growable: false);
     }
 
     final List<Currency> tickers = currencies.where((e) {
       if (excludedTicker == fromTicker) {
         return e.ticker != excludedTicker &&
-            availablePairs.where((e2) => e2.toTicker == e.ticker).isNotEmpty;
+            availablePairs.where((e2) => e2.toCurrency == e.ticker).isNotEmpty;
       } else {
         return e.ticker != excludedTicker &&
-            availablePairs.where((e2) => e2.fromTicker == e.ticker).isNotEmpty;
+            availablePairs
+                .where((e2) => e2.fromCurrency == e.ticker)
+                .isNotEmpty;
       }
     }).toList(growable: false);
 
@@ -178,7 +180,7 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
     _sendFocusNode.unfocus();
     _receiveFocusNode.unfocus();
 
-    List<FixedRateMarket> marketsThatPairWithExcludedTicker = [];
+    List<AvailablePair> marketsThatPairWithExcludedTicker = [];
 
     if (excludedTicker == "" ||
         excludedTicker == "-" ||
@@ -190,13 +192,17 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
       marketsThatPairWithExcludedTicker = ref
           .read(fixedRateMarketPairsStateProvider.state)
           .state
-          .where((e) => e.from == excludedTicker && e.to != excludedTicker)
+          .where((e) =>
+              e.fromCurrency == excludedTicker &&
+              e.toCurrency != excludedTicker)
           .toList(growable: false);
     } else {
       marketsThatPairWithExcludedTicker = ref
           .read(fixedRateMarketPairsStateProvider.state)
           .state
-          .where((e) => e.to == excludedTicker && e.from != excludedTicker)
+          .where((e) =>
+              e.toCurrency == excludedTicker &&
+              e.fromCurrency != excludedTicker)
           .toList(growable: false);
     }
 
@@ -230,6 +236,65 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
     _receiveController.text = isEstimated
         ? ref.read(estimatedRateExchangeFormProvider).toAmountString
         : ref.read(fixedRateExchangeFormProvider).toAmountString;
+
+    _sendFocusNode.addListener(() async {
+      if (!_sendFocusNode.hasFocus) {
+        final newFromAmount = Decimal.tryParse(_sendController.text);
+        if (newFromAmount != null) {
+          if (ref.read(prefsChangeNotifierProvider).exchangeRateType ==
+              ExchangeRateType.estimated) {
+            await ref
+                .read(estimatedRateExchangeFormProvider)
+                .setFromAmountAndCalculateToAmount(newFromAmount, true);
+          } else {
+            await ref
+                .read(fixedRateExchangeFormProvider)
+                .setFromAmountAndCalculateToAmount(newFromAmount, true);
+          }
+        } else {
+          if (ref.read(prefsChangeNotifierProvider).exchangeRateType ==
+              ExchangeRateType.estimated) {
+            await ref
+                .read(estimatedRateExchangeFormProvider)
+                .setFromAmountAndCalculateToAmount(Decimal.zero, true);
+          } else {
+            await ref
+                .read(fixedRateExchangeFormProvider)
+                .setFromAmountAndCalculateToAmount(Decimal.zero, true);
+          }
+          _receiveController.text = "";
+        }
+      }
+    });
+    _receiveFocusNode.addListener(() async {
+      if (!_receiveFocusNode.hasFocus) {
+        final newToAmount = Decimal.tryParse(_receiveController.text);
+        if (newToAmount != null) {
+          if (ref.read(prefsChangeNotifierProvider).exchangeRateType ==
+              ExchangeRateType.estimated) {
+            await ref
+                .read(estimatedRateExchangeFormProvider)
+                .setToAmountAndCalculateFromAmount(newToAmount, true);
+          } else {
+            await ref
+                .read(fixedRateExchangeFormProvider)
+                .setToAmountAndCalculateFromAmount(newToAmount, true);
+          }
+        } else {
+          if (ref.read(prefsChangeNotifierProvider).exchangeRateType ==
+              ExchangeRateType.estimated) {
+            await ref
+                .read(estimatedRateExchangeFormProvider)
+                .setToAmountAndCalculateFromAmount(Decimal.zero, true);
+          } else {
+            await ref
+                .read(fixedRateExchangeFormProvider)
+                .setToAmountAndCalculateFromAmount(Decimal.zero, true);
+          }
+          _sendController.text = "";
+        }
+      }
+    });
 
     super.initState();
   }
@@ -332,12 +397,12 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                               await ref
                                   .read(estimatedRateExchangeFormProvider)
                                   .setFromAmountAndCalculateToAmount(
-                                      newFromAmount, true);
+                                      newFromAmount, false);
                             } else {
                               await ref
                                   .read(fixedRateExchangeFormProvider)
                                   .setFromAmountAndCalculateToAmount(
-                                      newFromAmount, true);
+                                      newFromAmount, false);
                             }
                           } else {
                             if (ref
@@ -347,12 +412,12 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                               await ref
                                   .read(estimatedRateExchangeFormProvider)
                                   .setFromAmountAndCalculateToAmount(
-                                      Decimal.zero, true);
+                                      Decimal.zero, false);
                             } else {
                               await ref
                                   .read(fixedRateExchangeFormProvider)
                                   .setFromAmountAndCalculateToAmount(
-                                      Decimal.zero, true);
+                                      Decimal.zero, false);
                             }
                             _receiveController.text = "";
                           }
@@ -414,12 +479,12 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                                   final toTicker = ref
                                           .read(fixedRateExchangeFormProvider)
                                           .market
-                                          ?.to ??
+                                          ?.toCurrency ??
                                       "";
                                   final fromTicker = ref
                                           .read(fixedRateExchangeFormProvider)
                                           .market
-                                          ?.from ??
+                                          ?.fromCurrency ??
                                       "";
                                   await _showFixedRateSelectionSheet(
                                     excludedTicker: toTicker,
@@ -433,8 +498,9 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                                             .state
                                             .firstWhere(
                                               (e) =>
-                                                  e.to == toTicker &&
-                                                  e.from == selectedFromTicker,
+                                                  e.toCurrency == toTicker &&
+                                                  e.fromCurrency ==
+                                                      selectedFromTicker,
                                             );
 
                                         await ref
@@ -486,9 +552,9 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                                               image = _fetchIconUrlFromTickerForFixedRateFlow(
                                                   ref.watch(
                                                       fixedRateExchangeFormProvider
-                                                          .select((value) =>
-                                                              value.market
-                                                                  ?.from)));
+                                                          .select((value) => value
+                                                              .market
+                                                              ?.fromCurrency)));
                                             }
                                             if (image != null &&
                                                 image.isNotEmpty) {
@@ -552,7 +618,8 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                                             : ref.watch(
                                                     fixedRateExchangeFormProvider
                                                         .select((value) => value
-                                                            .market?.from
+                                                            .market
+                                                            ?.fromCurrency
                                                             .toUpperCase())) ??
                                                 "-",
                                         style: STextStyles.smallMed14.copyWith(
@@ -646,12 +713,12 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                               await ref
                                   .read(estimatedRateExchangeFormProvider)
                                   .setToAmountAndCalculateFromAmount(
-                                      newToAmount, true);
+                                      newToAmount, false);
                             } else {
                               await ref
                                   .read(fixedRateExchangeFormProvider)
                                   .setToAmountAndCalculateFromAmount(
-                                      newToAmount, true);
+                                      newToAmount, false);
                             }
                           } else {
                             if (ref
@@ -661,12 +728,12 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                               await ref
                                   .read(estimatedRateExchangeFormProvider)
                                   .setToAmountAndCalculateFromAmount(
-                                      Decimal.zero, true);
+                                      Decimal.zero, false);
                             } else {
                               await ref
                                   .read(fixedRateExchangeFormProvider)
                                   .setToAmountAndCalculateFromAmount(
-                                      Decimal.zero, true);
+                                      Decimal.zero, false);
                             }
                             _sendController.text = "";
                           }
@@ -728,7 +795,7 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                                   final fromTicker = ref
                                           .read(fixedRateExchangeFormProvider)
                                           .market
-                                          ?.from ??
+                                          ?.fromCurrency ??
                                       "";
                                   await _showFixedRateSelectionSheet(
                                     excludedTicker: fromTicker,
@@ -742,8 +809,9 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                                             .state
                                             .firstWhere(
                                               (e) =>
-                                                  e.to == selectedToTicker &&
-                                                  e.from == fromTicker,
+                                                  e.toCurrency ==
+                                                      selectedToTicker &&
+                                                  e.fromCurrency == fromTicker,
                                             );
 
                                         await ref
@@ -795,9 +863,9 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                                               image = _fetchIconUrlFromTickerForFixedRateFlow(
                                                   ref.watch(
                                                       fixedRateExchangeFormProvider
-                                                          .select((value) =>
-                                                              value.market
-                                                                  ?.to)));
+                                                          .select((value) => value
+                                                              .market
+                                                              ?.toCurrency)));
                                             }
                                             if (image != null &&
                                                 image.isNotEmpty) {
@@ -860,7 +928,7 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                                             : ref.watch(
                                                     fixedRateExchangeFormProvider
                                                         .select((value) => value
-                                                            .market?.to
+                                                            .market?.toCurrency
                                                             .toUpperCase())) ??
                                                 "-",
                                         style: STextStyles.smallMed14.copyWith(
@@ -919,8 +987,8 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                               final market = ref
                                   .read(fixedRateExchangeFormProvider)
                                   .market;
-                              final fromTicker = market?.from ?? "";
-                              final toTicker = market?.to ?? "";
+                              final fromTicker = market?.fromCurrency ?? "";
+                              final toTicker = market?.toCurrency ?? "";
                               if (!(fromTicker.isEmpty ||
                                   toTicker.isEmpty ||
                                   toTicker == "-" ||
@@ -931,8 +999,8 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                                             .state)
                                     .state
                                     .where((e) =>
-                                        e.toTicker == toTicker &&
-                                        e.fromTicker == fromTicker);
+                                        e.toCurrency == toTicker &&
+                                        e.fromCurrency == fromTicker);
                                 if (available.isNotEmpty) {
                                   final availableCurrencies = ref
                                       .read(
@@ -980,15 +1048,15 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                                   toTicker.isEmpty ||
                                   toTicker == "-" ||
                                   fromTicker == "-")) {
-                                FixedRateMarket? market;
+                                AvailablePair? market;
                                 try {
                                   market = ref
                                       .read(fixedRateMarketPairsStateProvider
                                           .state)
                                       .state
                                       .firstWhere((e) =>
-                                          e.from == fromTicker &&
-                                          e.to == toTicker);
+                                          e.fromCurrency == fromTicker &&
+                                          e.toCurrency == toTicker);
                                 } catch (_) {
                                   market = null;
                                 }
@@ -1073,8 +1141,8 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                                               .state)
                                       .state;
                                   for (final pair in availableFloatingPairs) {
-                                    if (pair.fromTicker == fromTicker &&
-                                        pair.toTicker == toTicker) {
+                                    if (pair.fromCurrency == fromTicker &&
+                                        pair.toCurrency == toTicker) {
                                       isAvailable = true;
                                       break;
                                     }
@@ -1107,7 +1175,8 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                                       .getEstimatedExchangeAmount(
                                         fromTicker: fromTicker,
                                         toTicker: toTicker,
-                                        fromAmount: sendAmount,
+                                        amount: sendAmount,
+                                        fromOrTo: CNEstimateType.direct,
                                       );
 
                                   if (response.value == null) {
@@ -1124,17 +1193,17 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                                   }
 
                                   String rate =
-                                      "1 ${fromTicker.toUpperCase()} ~${(response.value!.estimatedAmount / sendAmount).toDecimal(scaleOnInfinitePrecision: 8).toStringAsFixed(8)} ${toTicker.toUpperCase()}";
+                                      "1 ${fromTicker.toUpperCase()} ~${(response.value!.toAmount! / sendAmount).toDecimal(scaleOnInfinitePrecision: 8).toStringAsFixed(8)} ${toTicker.toUpperCase()}";
 
                                   final model = IncompleteExchangeModel(
                                     sendTicker: fromTicker.toUpperCase(),
                                     receiveTicker: toTicker.toUpperCase(),
                                     rateInfo: rate,
                                     sendAmount: sendAmount,
-                                    receiveAmount:
-                                        response.value!.estimatedAmount,
+                                    receiveAmount: response.value!.toAmount!,
                                     rateId: response.value!.rateId,
                                     rateType: rateType,
+                                    type: CNEstimateType.direct,
                                   );
 
                                   if (mounted) {
@@ -1152,12 +1221,12 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                                   final fromTicker = ref
                                           .read(fixedRateExchangeFormProvider)
                                           .market
-                                          ?.from ??
+                                          ?.fromCurrency ??
                                       "";
                                   final toTicker = ref
                                           .read(fixedRateExchangeFormProvider)
                                           .market
-                                          ?.to ??
+                                          ?.toCurrency ??
                                       "";
 
                                   final sendAmount = Decimal.parse(ref
@@ -1170,11 +1239,12 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
 
                                   final response = await ref
                                       .read(changeNowProvider)
-                                      .getEstimatedFixedRateExchangeAmount(
+                                      .getEstimatedExchangeAmount(
                                         fromTicker: fromTicker,
                                         toTicker: toTicker,
-                                        fromAmount: sendAmount,
-                                        useRateId: true,
+                                        amount: sendAmount,
+                                        flow: CNFlowType.fixedRate,
+                                        fromOrTo: CNEstimateType.direct,
                                       );
 
                                   bool? shouldCancel;
@@ -1250,18 +1320,20 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                                     return;
                                   }
 
+                                  // String rate =
+                                  //     "1 $fromTicker ~${ref.read(fixedRateExchangeFormProvider).market!.rate.toStringAsFixed(8)} $toTicker";
                                   String rate =
-                                      "1 $fromTicker ~${ref.read(fixedRateExchangeFormProvider).market!.rate.toStringAsFixed(8)} $toTicker";
+                                      "1 ${fromTicker.toUpperCase()} ~${(response.value!.toAmount! / sendAmount).toDecimal(scaleOnInfinitePrecision: 8).toStringAsFixed(8)} ${toTicker.toUpperCase()}";
 
                                   final model = IncompleteExchangeModel(
                                     sendTicker: fromTicker,
                                     receiveTicker: toTicker,
                                     rateInfo: rate,
                                     sendAmount: sendAmount,
-                                    receiveAmount:
-                                        response.value!.estimatedAmount,
+                                    receiveAmount: response.value!.toAmount!,
                                     rateId: response.value!.rateId,
                                     rateType: rateType,
+                                    type: CNEstimateType.direct,
                                   );
 
                                   if (mounted) {

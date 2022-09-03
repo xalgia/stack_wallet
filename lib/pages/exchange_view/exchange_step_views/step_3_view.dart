@@ -10,6 +10,7 @@ import 'package:stackwallet/pages/exchange_view/sub_widgets/exchange_rate_sheet.
 import 'package:stackwallet/pages/exchange_view/sub_widgets/step_row.dart';
 import 'package:stackwallet/providers/exchange/change_now_provider.dart';
 import 'package:stackwallet/providers/global/trades_service_provider.dart';
+import 'package:stackwallet/services/change_now/change_now.dart';
 import 'package:stackwallet/services/notifications_api.dart';
 import 'package:stackwallet/utilities/assets.dart';
 import 'package:stackwallet/utilities/cfcolors.dart';
@@ -218,32 +219,22 @@ class _Step3ViewState extends ConsumerState<Step3View> {
                               child: TextButton(
                                 onPressed: () async {
                                   ChangeNowResponse<ExchangeTransaction>
-                                      response;
-                                  if (model.rateType ==
-                                      ExchangeRateType.estimated) {
-                                    response = await ref
-                                        .read(changeNowProvider)
-                                        .createStandardExchangeTransaction(
-                                          fromTicker: model.sendTicker,
-                                          toTicker: model.receiveTicker,
-                                          receivingAddress:
-                                              model.recipientAddress!,
-                                          amount: model.sendAmount,
-                                          refundAddress: model.refundAddress!,
-                                        );
-                                  } else {
-                                    response = await ref
-                                        .read(changeNowProvider)
-                                        .createFixedRateExchangeTransaction(
-                                          fromTicker: model.sendTicker,
-                                          toTicker: model.receiveTicker,
-                                          receivingAddress:
-                                              model.recipientAddress!,
-                                          amount: model.sendAmount,
-                                          refundAddress: model.refundAddress!,
-                                          rateId: model.rateId!,
-                                        );
-                                  }
+                                      response = await ref
+                                          .read(changeNowProvider)
+                                          .createExchangeTransaction(
+                                            fromTicker: model.sendTicker,
+                                            fromNetwork: "",
+                                            toTicker: model.receiveTicker,
+                                            toNetwork: "",
+                                            receivingAddress:
+                                                model.recipientAddress!,
+                                            amount: model.sendAmount,
+                                            fromOrTo: model.type,
+                                            flow: model.rateType ==
+                                                    ExchangeRateType.estimated
+                                                ? CNFlowType.standard
+                                                : CNFlowType.fixedRate,
+                                          );
 
                                   if (response.value == null) {
                                     unawaited(showDialog<void>(
