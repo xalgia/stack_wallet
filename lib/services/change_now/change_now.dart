@@ -96,84 +96,85 @@ class ChangeNow {
     }
   }
 
-  /// This API endpoint returns the list of available currencies.
-  ///
-  /// Set [active] to true to return only active currencies.
-  /// Set [fixedRate] to true to return only currencies available on a fixed-rate flow.
-  Future<ChangeNowResponse<List<Currency>>> getAvailableCurrencies({
-    bool? fixedRate,
-    bool? active,
-  }) async {
-    Map<String, dynamic>? params;
-
-    if (active != null || fixedRate != null) {
-      params = {};
-      if (fixedRate != null) {
-        params.addAll({"fixedRate": fixedRate.toString()});
-      }
-      if (active != null) {
-        params.addAll({"active": active.toString()});
-      }
-    }
-
-    final uri = _buildUri("/currencies", params);
-
-    try {
-      // json array is expected here
-      final jsonArray = await _makeGetRequest(uri);
-
-      try {
-        final result = await compute(
-            _parseAvailableCurrenciesJson, jsonArray as List<dynamic>);
-        return result;
-      } catch (e, s) {
-        Logging.instance.log("getAvailableCurrencies exception: $e\n$s",
-            level: LogLevel.Error);
-        return ChangeNowResponse(
-          exception: ChangeNowException(
-            "Error: $jsonArray",
-            ChangeNowExceptionType.serializeResponseError,
-          ),
-        );
-      }
-    } catch (e, s) {
-      Logging.instance.log("getAvailableCurrencies exception: $e\n$s",
-          level: LogLevel.Error);
-      return ChangeNowResponse(
-        exception: ChangeNowException(
-          e.toString(),
-          ChangeNowExceptionType.generic,
-        ),
-      );
-    }
-  }
-
-  ChangeNowResponse<List<Currency>> _parseAvailableCurrenciesJson(
-      List<dynamic> jsonArray) {
-    try {
-      List<Currency> currencies = [];
-
-      for (final json in jsonArray) {
-        try {
-          currencies
-              .add(Currency.fromJson(Map<String, dynamic>.from(json as Map)));
-        } catch (_) {
-          return ChangeNowResponse(
-              exception: ChangeNowException("Failed to serialize $json",
-                  ChangeNowExceptionType.serializeResponseError));
-        }
-      }
-
-      return ChangeNowResponse(value: currencies);
-    } catch (_) {
-      rethrow;
-    }
-  }
+  // /// This API endpoint returns the list of available currencies.
+  // ///
+  // /// Set [active] to true to return only active currencies.
+  // /// Set [fixedRate] to true to return only currencies available on a fixed-rate flow.
+  // Future<ChangeNowResponse<List<Currency>>> getAvailableCurrencies({
+  //   bool? fixedRate,
+  //   bool? active,
+  // }) async {
+  //   Map<String, dynamic>? params;
+  //
+  //   if (active != null || fixedRate != null) {
+  //     params = {};
+  //     if (fixedRate != null) {
+  //       params.addAll({"fixedRate": fixedRate.toString()});
+  //     }
+  //     if (active != null) {
+  //       params.addAll({"active": active.toString()});
+  //     }
+  //   }
+  //
+  //   final uri = _buildUri("/currencies", params);
+  //
+  //   try {
+  //     // json array is expected here
+  //     final jsonArray = await _makeGetRequest(uri);
+  //
+  //     try {
+  //       final result = await compute(
+  //           _parseAvailableCurrenciesJson, jsonArray as List<dynamic>);
+  //       return result;
+  //     } catch (e, s) {
+  //       Logging.instance.log("getAvailableCurrencies exception: $e\n$s",
+  //           level: LogLevel.Error);
+  //       return ChangeNowResponse(
+  //         exception: ChangeNowException(
+  //           "Error: $jsonArray",
+  //           ChangeNowExceptionType.serializeResponseError,
+  //         ),
+  //       );
+  //     }
+  //   } catch (e, s) {
+  //     Logging.instance.log("getAvailableCurrencies exception: $e\n$s",
+  //         level: LogLevel.Error);
+  //     return ChangeNowResponse(
+  //       exception: ChangeNowException(
+  //         e.toString(),
+  //         ChangeNowExceptionType.generic,
+  //       ),
+  //     );
+  //   }
+  // }
+  //
+  // ChangeNowResponse<List<Currency>> _parseAvailableCurrenciesJson(
+  //     List<dynamic> jsonArray) {
+  //   try {
+  //     List<Currency> currencies = [];
+  //
+  //     for (final json in jsonArray) {
+  //       try {
+  //         currencies
+  //             .add(Currency.fromJson(Map<String, dynamic>.from(json as Map)));
+  //       } catch (_) {
+  //         return ChangeNowResponse(
+  //             exception: ChangeNowException("Failed to serialize $json",
+  //                 ChangeNowExceptionType.serializeResponseError));
+  //       }
+  //     }
+  //
+  //     return ChangeNowResponse(value: currencies);
+  //   } catch (_) {
+  //     rethrow;
+  //   }
+  // }
 
   /// This v2 API endpoint returns the list of available currencies.
   Future<ChangeNowResponse<List<Currency>>> getAvailableCurrenciesV2({
     bool? active,
     required CNFlowType flow,
+    String? apiKey,
   }) async {
     Map<String, dynamic> params = {
       "flow": flow.value,
@@ -187,7 +188,8 @@ class ChangeNow {
 
     try {
       // json array is expected here
-      final jsonArray = await _makeGetRequest(uri);
+      final jsonArray =
+          await _makeGetRequestV2(uri, apiKey ?? kChangeNowApiKey);
 
       try {
         final result = await compute(
