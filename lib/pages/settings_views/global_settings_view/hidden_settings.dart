@@ -149,6 +149,33 @@ class HiddenSettings extends StatelessWidget {
                       //     ),
                       //   ),
                       // ),
+                      // const SizedBox(
+                      //   height: 12,
+                      // ),
+                      // GestureDetector(
+                      //   onTap: () async {
+                      //     final c = await SimpleSwapAPI.instance
+                      //         .createNewExchange(
+                      //             isFixedRate: false,
+                      //             currencyFrom: "xmr",
+                      //             currencyTo: "firo",
+                      //             addressTo:
+                      //                 "aPA7miqhbWPGMkPUuz4akpS9tMqyKXBJNG",
+                      //             userRefundAddress: "",
+                      //             userRefundExtraId: "",
+                      //             amount: "0.5");
+                      //
+                      //     print(c);
+                      //   },
+                      //   child: RoundedWhiteContainer(
+                      //     child: Text(
+                      //       "Currencies v2 test",
+                      //       style: STextStyles.button.copyWith(
+                      //         color: CFColors.stackAccent,
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ),
                     ],
                   ),
                 ),
