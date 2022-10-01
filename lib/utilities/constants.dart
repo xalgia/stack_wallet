@@ -18,6 +18,7 @@ abstract class Constants {
 
   //TODO: correct for monero?
   static const int satsPerCoinMonero = 1000000000000;
+  static const int satsPerCoinWownero = 100000000000;
   static const int satsPerCoin = 100000000;
   static const int decimalPlaces = 8;
 
@@ -40,6 +41,7 @@ abstract class Constants {
     switch (coin) {
       case Coin.bitcoin:
       case Coin.bitcoincash:
+      case Coin.bitcoincashTestnet:
       case Coin.dogecoin:
       case Coin.firo:
       case Coin.bitcoinTestNet:
@@ -52,6 +54,9 @@ abstract class Constants {
 
       case Coin.monero:
         values.addAll([25]);
+        break;
+      case Coin.wownero:
+        values.addAll([14]);
         break;
     }
     return values;
@@ -80,6 +85,9 @@ abstract class Constants {
         return 60;
 
       case Coin.monero:
+        return 120;
+
+      case Coin.wownero:
         return 120;
 
       case Coin.namecoin:
