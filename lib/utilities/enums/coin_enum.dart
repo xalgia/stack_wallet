@@ -207,6 +207,7 @@ Coin coinFromPrettyName(String name) {
 
     case "Bitcoincash Testnet":
     case "tBitcoin Cash":
+    case "bitcoincashTestnet":
     case "Bitcoin Cash Testnet":
       return Coin.bitcoincashTestnet;
     case "Firo Testnet":
