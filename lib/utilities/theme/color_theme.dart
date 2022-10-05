@@ -206,11 +206,13 @@ class CoinThemeColor {
       case Coin.firoTestNet:
         return firo;
       case Coin.monero:
+      case Coin.moneroTestNet:
+      case Coin.moneroStageNet:
         return monero;
-      case Coin.namecoin:
-        return namecoin;
       case Coin.wownero:
         return wownero;
+      case Coin.namecoin:
+        return namecoin;
     }
   }
 }
