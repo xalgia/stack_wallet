@@ -220,6 +220,12 @@ abstract class DefaultNodes {
       case Coin.monero:
         return monero;
 
+      case Coin.moneroTestNet:
+        return moneroTestNet;
+
+      case Coin.moneroStageNet:
+        return moneroStageNet;
+
       case Coin.wownero:
         return wownero;
 
