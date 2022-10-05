@@ -27,6 +27,7 @@ class SearchableCoinList extends ConsumerWidget {
     }
     if (!showTestNetCoins) {
       _coins.removeWhere((e) => e.name.endsWith("TestNet"));
+      _coins.removeWhere((e) => e.name.endsWith("StageNet"));
     }
     // remove firo testnet regardless
     _coins.remove(Coin.firoTestNet);
