@@ -189,7 +189,7 @@ class _PNG {
 
   String get monero => "assets/images/monero.png";
   String get moneroTestNet => "assets/images/monero.png";
-  String get moneroStagenet => "assets/images/monero.png";
+  String get moneroStageNet => "assets/images/monero.png";
   String get wownero => "assets/images/wownero.png";
   String get firo => "assets/images/firo.png";
   String get dogecoin => "assets/images/doge.png";
@@ -219,8 +219,8 @@ class _PNG {
         return monero;
       case Coin.moneroTestNet:
         return moneroTestNet;
-      case Coin.moneroStagenet:
-        return moneroStagenet;
+      case Coin.moneroStageNet:
+        return moneroStageNet;
       case Coin.wownero:
         return wownero;
       case Coin.namecoin:
