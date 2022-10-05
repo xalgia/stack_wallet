@@ -90,6 +90,8 @@ class _AddEditNodeViewState extends ConsumerState<AddEditNodeView> {
         break;
 
       case Coin.monero:
+      case Coin.moneroTestNet:
+      case Coin.moneroStageNet:
       case Coin.wownero:
         try {
           final uri = Uri.parse(formData.host!);
@@ -541,6 +543,8 @@ class _NodeFormState extends ConsumerState<NodeForm> {
 
       case Coin.epicCash:
       case Coin.monero:
+      case Coin.moneroStageNet:
+      case Coin.moneroTestNet:
       case Coin.wownero:
         return true;
     }
