@@ -23,6 +23,7 @@ abstract class Constants {
   static const int decimalPlaces = 8;
   static const int decimalPlacesWownero = 11;
   static const int decimalPlacesMonero = 12;
+  static const int decimalPlacesMoneroTestNet = 12; // Testnet may have different rules than mainnet & stagenet
 
   static const int notificationsMax = 0xFFFFFFFF;
   static const Duration networkAliveTimerDuration = Duration(seconds: 10);
