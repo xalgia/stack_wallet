@@ -18,13 +18,10 @@ enum Coin {
   epicCash,
   firo,
   monero,
+  moneroTestNet,
+  moneroStageNet,
   wownero,
   namecoin,
-
-  ///
-  ///
-  ///
-
   bitcoinTestNet,
   bitcoincashTestnet,
   dogecoinTestNet,
@@ -49,6 +46,10 @@ extension CoinExt on Coin {
         return "Firo";
       case Coin.monero:
         return "Monero";
+      case Coin.moneroTestNet:
+        return "tMonero";
+      case Coin.moneroStageNet:
+        return "sMonero";
       case Coin.wownero:
         return "Wownero";
       case Coin.namecoin:
@@ -78,6 +79,10 @@ extension CoinExt on Coin {
         return "FIRO";
       case Coin.monero:
         return "XMR";
+      case Coin.moneroTestNet:
+        return "tXMR";
+      case Coin.moneroStageNet:
+        return "sXMR";
       case Coin.wownero:
         return "WOW";
       case Coin.namecoin:
@@ -108,6 +113,10 @@ extension CoinExt on Coin {
         return "firo";
       case Coin.monero:
         return "monero";
+      case Coin.moneroTestNet:
+        return "moneroTestNet";
+      case Coin.moneroStageNet:
+        return "moneroStageNet";
       case Coin.wownero:
         return "wownero";
       case Coin.namecoin:
@@ -138,6 +147,8 @@ extension CoinExt on Coin {
 
       case Coin.epicCash:
       case Coin.monero:
+      case Coin.moneroTestNet:
+      case Coin.moneroStageNet:
       case Coin.wownero:
         return false;
     }
@@ -165,6 +176,8 @@ extension CoinExt on Coin {
         return epic.MINIMUM_CONFIRMATIONS;
 
       case Coin.monero:
+      case Coin.moneroTestNet:
+      case Coin.moneroStageNet:
         return xmr.MINIMUM_CONFIRMATIONS;
 
       case Coin.wownero:
@@ -197,6 +210,18 @@ Coin coinFromPrettyName(String name) {
     case "Monero":
     case "monero":
       return Coin.monero;
+    case "Monero Testnet":
+    case "tMonero":
+    case "moneroTestNet":
+      return Coin.moneroTestNet;
+    case "Monero Stagenet":
+    case "sMonero":
+    case "moneroStageNet":
+      return Coin.moneroStageNet;
+    case "Wownero":
+    case "tWownero":
+    case "wownero":
+      return Coin.wownero;
     case "Namecoin":
     case "namecoin":
       return Coin.namecoin;
@@ -217,10 +242,6 @@ Coin coinFromPrettyName(String name) {
     case "tDogecoin":
     case "dogecoinTestNet":
       return Coin.dogecoinTestNet;
-    case "Wownero":
-    case "tWownero":
-    case "wownero":
-      return Coin.wownero;
     default:
       throw ArgumentError.value(
           name, "name", "No Coin enum value with that prettyName");
@@ -241,6 +262,12 @@ Coin coinFromTickerCaseInsensitive(String ticker) {
       return Coin.firo;
     case "xmr":
       return Coin.monero;
+    case "txmr":
+      return Coin.moneroTestNet;
+    case "sxmr":
+      return Coin.moneroStageNet;
+    case "wow":
+      return Coin.wownero;
     case "nmc":
       return Coin.namecoin;
     case "tbtc":
@@ -251,8 +278,6 @@ Coin coinFromTickerCaseInsensitive(String ticker) {
       return Coin.firoTestNet;
     case "tdoge":
       return Coin.dogecoinTestNet;
-    case "wow":
-      return Coin.wownero;
     default:
       throw ArgumentError.value(
           ticker, "name", "No Coin enum value with that ticker");
