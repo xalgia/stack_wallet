@@ -144,6 +144,8 @@ class _SVG {
   String get bitcoincashTestnet => "assets/svg/coin_icons/Bitcoincash.svg";
   String get firoTestnet => "assets/svg/coin_icons/Firo.svg";
   String get dogecoinTestnet => "assets/svg/coin_icons/Dogecoin.svg";
+  String get moneroTestNet => "assets/svg/coin_icons/Monero.svg";
+  String get moneroStageNet => "assets/svg/coin_icons/Monero.svg";
 
   String iconFor({required Coin coin}) {
     switch (coin) {
@@ -159,6 +161,10 @@ class _SVG {
         return firo;
       case Coin.monero:
         return monero;
+      case Coin.moneroTestNet:
+        return moneroTestNet;
+      case Coin.moneroStageNet:
+        return moneroStageNet;
       case Coin.wownero:
         return wownero;
       case Coin.namecoin:
@@ -182,6 +188,8 @@ class _PNG {
   String get splash => "assets/images/splash.png";
 
   String get monero => "assets/images/monero.png";
+  String get moneroTestNet => "assets/images/monero.png";
+  String get moneroStagenet => "assets/images/monero.png";
   String get wownero => "assets/images/wownero.png";
   String get firo => "assets/images/firo.png";
   String get dogecoin => "assets/images/doge.png";
@@ -209,6 +217,10 @@ class _PNG {
         return firo;
       case Coin.monero:
         return monero;
+      case Coin.moneroTestNet:
+        return moneroTestNet;
+      case Coin.moneroStagenet:
+        return moneroStagenet;
       case Coin.wownero:
         return wownero;
       case Coin.namecoin:
