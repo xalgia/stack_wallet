@@ -51,9 +51,10 @@ class AddressUtils {
       case Coin.firo:
         return Address.validateAddress(address, firoNetwork);
       case Coin.monero:
-        return RegExp("[a-zA-Z0-9]{95}").hasMatch(address) ||
-            RegExp("[a-zA-Z0-9]{106}").hasMatch(address);
+      case Coin.moneroTestNet:
+      case Coin.moneroStageNet:
       case Coin.wownero:
+        // TODO check first bits and validate Monero-based coins/networks (mainnet, testnet, stagenet, wownero, etc)
         return RegExp("[a-zA-Z0-9]{95}").hasMatch(address) ||
             RegExp("[a-zA-Z0-9]{106}").hasMatch(address);
       case Coin.namecoin:
