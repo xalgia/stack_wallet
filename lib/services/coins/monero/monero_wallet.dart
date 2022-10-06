@@ -715,7 +715,20 @@ class MoneroWallet extends CoinServiceAPI {
       );
       _walletCreationService?.changeWalletType();
       // To restore from a seed
-      final wallet = await _walletCreationService?.create(credentials);
+      int nettype = 0;
+      switch (coin) {
+        case Coin.monero:
+          break;
+        case Coin.moneroStageNet:
+          nettype = 2;
+          break;
+        case Coin.moneroTestNet:
+          nettype = 1;
+          break;
+      }
+
+      final wallet =
+          await _walletCreationService?.create(credentials, nettype: nettype);
 
       await _secureStore.write(
           key: '${_walletId}_mnemonic', value: wallet?.seed.trim());
