@@ -717,8 +717,6 @@ class MoneroWallet extends CoinServiceAPI {
       // To restore from a seed
       int nettype = 0;
       switch (coin) {
-        case Coin.monero:
-          break;
         case Coin.moneroStageNet:
           nettype = 2;
           break;
