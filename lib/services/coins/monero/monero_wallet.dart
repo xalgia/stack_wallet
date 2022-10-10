@@ -115,7 +115,7 @@ class MoneroWallet extends CoinServiceAPI {
   }
 
   @override
-  Future<void> updateNode(bool shouldRefresh) async {
+  Future<void> updateNode(bool shouldRefresh, {int nettype = 0}) async {
     final node = await getCurrentNode();
 
     final host = Uri.parse(node.host).host;
@@ -679,9 +679,31 @@ class MoneroWallet extends CoinServiceAPI {
     WalletCredentials credentials;
     try {
       String name = _walletId;
-      final dirPath =
-          await pathForWalletDir(name: name, type: WalletType.monero);
-      final path = await pathForWallet(name: name, type: WalletType.monero);
+      
+      // Find coin name for nettype (monero, moneroStageNet, moneroTestNet, etc) by calling the database for all wallet names and use the name param to find the coin ... Not a good solution, hacky, need to find better way to find the coin/nettype here
+      final _names = DB.instance.get<dynamic>(
+          boxName: DB.boxNameAllWalletsData, key: 'names') as Map?;
+
+      Map<String, dynamic> names;
+      if (_names == null) {
+        names = {};
+      } else {
+        names = Map<String, dynamic>.from(_names);
+      }
+
+      int nettype = 0;
+      var type = WalletType.monero;
+
+      if (names[name]['coin'] == 'moneroStageNet') {
+        nettype = 2;
+        type = WalletType.moneroStageNet;
+      } else if (names[name]['coin'] == 'moneroTestNet') {
+        nettype = 1;
+        type = WalletType.moneroTestNet;
+      }
+
+      final dirPath = await pathForWalletDir(name: name, type: type);
+      final path = await pathForWallet(name: name, type: type);
       credentials = monero.createMoneroNewWalletCredentials(
         name: name,
         language: "English",
@@ -695,9 +717,9 @@ class MoneroWallet extends CoinServiceAPI {
           boxName: walletId, key: "restoreHeight", value: bufferedCreateHeight);
 
       walletInfo = WalletInfo.external(
-          id: WalletBase.idFor(name, WalletType.monero),
+          id: WalletBase.idFor(name, type),
           name: name,
-          type: WalletType.monero,
+          type: type,
           isRecovery: false,
           restoreHeight: credentials.height ?? 0,
           date: DateTime.now(),
@@ -715,15 +737,6 @@ class MoneroWallet extends CoinServiceAPI {
       );
       _walletCreationService?.changeWalletType();
       // To restore from a seed
-      int nettype = 0;
-      switch (coin) {
-        case Coin.moneroStageNet:
-          nettype = 2;
-          break;
-        case Coin.moneroTestNet:
-          nettype = 1;
-          break;
-      }
 
       final wallet =
           await _walletCreationService?.create(credentials, nettype: nettype);
