@@ -677,30 +677,31 @@ class MoneroWallet extends CoinServiceAPI {
     keysStorage = KeyService(storage!);
     WalletInfo walletInfo;
     WalletCredentials credentials;
+
+    // Find coin name for nettype (monero, moneroStageNet, moneroTestNet, etc) by calling the database for all wallet names and use the name param to find the coin ... Not a good solution, hacky, need to find better way to find the coin/nettype here
+    final _names = DB.instance
+        .get<dynamic>(boxName: DB.boxNameAllWalletsData, key: 'names') as Map?;
+
+    Map<String, dynamic> names;
+    if (_names == null) {
+      names = {};
+    } else {
+      names = Map<String, dynamic>.from(_names);
+    }
+
+    int nettype = 0;
+    var type = WalletType.monero;
+
+    if (names[_walletId]['coin'] == 'moneroStageNet') {
+      nettype = 2;
+      type = WalletType.moneroStageNet;
+    } else if (names[_walletId]['coin'] == 'moneroTestNet') {
+      nettype = 1;
+      type = WalletType.moneroTestNet;
+    }
+
     try {
       String name = _walletId;
-      
-      // Find coin name for nettype (monero, moneroStageNet, moneroTestNet, etc) by calling the database for all wallet names and use the name param to find the coin ... Not a good solution, hacky, need to find better way to find the coin/nettype here
-      final _names = DB.instance.get<dynamic>(
-          boxName: DB.boxNameAllWalletsData, key: 'names') as Map?;
-
-      Map<String, dynamic> names;
-      if (_names == null) {
-        names = {};
-      } else {
-        names = Map<String, dynamic>.from(_names);
-      }
-
-      int nettype = 0;
-      var type = WalletType.monero;
-
-      if (names[name]['coin'] == 'moneroStageNet') {
-        nettype = 2;
-        type = WalletType.moneroStageNet;
-      } else if (names[name]['coin'] == 'moneroTestNet') {
-        nettype = 1;
-        type = WalletType.moneroTestNet;
-      }
 
       final dirPath = await pathForWalletDir(name: name, type: type);
       final path = await pathForWallet(name: name, type: type);
@@ -755,7 +756,7 @@ class MoneroWallet extends CoinServiceAPI {
     final node = await getCurrentNode();
     final host = Uri.parse(node.host).host;
     await walletBase?.connectToNode(
-        node: Node(uri: "$host:${node.port}", type: WalletType.monero));
+        node: Node(uri: "$host:${node.port}", type: type));
     await walletBase?.startSync();
     await DB.instance
         .put<dynamic>(boxName: walletId, key: "id", value: _walletId);
