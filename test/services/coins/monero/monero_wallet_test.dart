@@ -36,11 +36,18 @@ void main() {
     WalletService? walletService;
     dynamic _walletInfoSource;
 
-    setUp(() async {
-      const name = 'validateAddressStageNet';
-      const type = WalletType.moneroStageNet;
-      const nettype = 2;
+    const name = 'validateAddressStageNet';
+    const type = WalletType.moneroStageNet;
+    const nettype = 2;
 
+    WalletCredentials credentials;
+    credentials = monero.createMoneroNewWalletCredentials(
+      name: name,
+      language: 'English',
+    );
+    dynamic result;
+
+    setUp(() async {
       wallet = MoneroWallet(
         walletId: 'validateAddressStageNet',
         walletName: 'validateAddressStageNet',
@@ -60,12 +67,6 @@ void main() {
       if (_path != null) {
         path = _dirPath;
       }
-
-      WalletCredentials credentials;
-      credentials = monero.createMoneroNewWalletCredentials(
-        name: name,
-        language: 'English',
-      ); // TODO test
 
       WalletInfo walletInfo;
       walletInfo = WalletInfo.external(
@@ -94,24 +95,34 @@ void main() {
       // walletService = monero.createMoneroWalletService(DB.instance.moneroWalletInfoBox);
       walletService = monero.createMoneroWalletService(_walletInfoSource);
 
+      result = await walletService!.create(credentials, nettype: nettype);
+
+      /*
       WalletCreationService? _walletCreationService;
       _walletCreationService = WalletCreationService(
-          /*
         secureStorage: storage,
         sharedPreferences: prefs,
         walletService: walletService,
         keyService: keysStorage,
-         */
           ); // TODO test
       _walletCreationService.changeWalletType(); // TODO test
 
-      var stagenetWallet =
-          await _walletCreationService.create(credentials, nettype: nettype);
-
-      /*
       walletBase =
           wallet as MoneroWalletBase; // Error: 'MoneroWalletBase' isn't a type.
        */
+    });
+
+    test("Test 0", () async {
+      print('Test 0');
+      print(result);
+    });
+  });
+
+  group("Test 1", () {
+    setUp(() async {});
+
+    test("Test 1", () async {
+      print('Test 1');
     });
   });
 }
