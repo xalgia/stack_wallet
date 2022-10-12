@@ -36,6 +36,10 @@ import 'package:stackwallet/utilities/flutter_secure_storage_interface.dart';
 
 import 'dart:developer' as developer;
 
+// TODO trim down to the minimum imports above
+
+import 'monero_wallet_test_data.dart';
+
 //FlutterSecureStorage? storage;
 FakeSecureStorage? storage;
 WalletService? walletService;
@@ -74,22 +78,10 @@ void main() async {
   }
   await Hive.close();
   Hive.init(appDir.path);
-
-  // if (!Hive.isAdapterRegistered(Node.typeId)) {
   Hive.registerAdapter(NodeAdapter());
-  // }
-
-  // if (!Hive.isAdapterRegistered(WalletInfo.typeId)) {
   Hive.registerAdapter(WalletInfoAdapter());
-  // }
-
-  // if (!Hive.isAdapterRegistered(WalletType.)) {
   Hive.registerAdapter(WalletTypeAdapter());
-  // }
-
-  // if (!Hive.isAdapterRegistered(UnspentCoinsInfo.typeId)) {
   Hive.registerAdapter(UnspentCoinsInfoAdapter());
-  // }
 
   monero.onStartup();
   _walletInfoSource = await Hive.openBox<WalletInfo>(WalletInfo.boxName);
@@ -98,10 +90,8 @@ void main() async {
   group("Stagenet tests", () {
     setUp(() async {
       try {
-        // if (name?.isEmpty ?? true) {
-        // name = await generateName();
-        // }
-        name = "namee${Random().nextInt(10000000)}";
+        name =
+            'namee${Random().nextInt(10000000)}'; // TODO set static name and handle mocked storage etc to not pollute wallet files
         type = WalletType.moneroStageNet;
         nettype = 2;
         final dirPath = await pathForWalletDir(name: name, type: type);
@@ -112,11 +102,7 @@ void main() async {
             //     name: name, language: "English");
             // restoring a previous wallet
             monero.createMoneroRestoreWalletFromSeedCredentials(
-          name: name,
-          height: 2580000,
-          mnemonic:
-              'agreed aquarium wallets uptight karate wonders afoot guys itself nucleus reduce lamb fully fewest bimonthly dazed skulls magically mocked fugitive imbalance saga calamity dialect itself',
-        );
+                name: name, height: 2580000, mnemonic: testMnemonic);
 
         walletInfo = WalletInfo.external(
             id: WalletBase.idFor(name, type),
@@ -156,8 +142,7 @@ void main() async {
       walletBase = wallet as MoneroWalletBase;
       //print("${walletBase?.seed}");
 
-      expect(walletInfo.address,
-          '5ArTmbRXWxQhAWKMeCZ3h4ZSPnAcW5VBtRFyLd6gBEf6GgJU2FHXDA6i1DnQTd6h8R3VU5AkbGcWSNhtSwNNPgaD49oStD5');
+      expect(walletInfo.address, stagenetTestData['address']);
     });
   });
 
@@ -178,11 +163,7 @@ void main() async {
             //     name: name, language: "English");
             // restoring a previous wallet
             monero.createMoneroRestoreWalletFromSeedCredentials(
-          name: name,
-          height: 2580000,
-          mnemonic:
-              'agreed aquarium wallets uptight karate wonders afoot guys itself nucleus reduce lamb fully fewest bimonthly dazed skulls magically mocked fugitive imbalance saga calamity dialect itself',
-        );
+                name: name, height: 2580000, mnemonic: testMnemonic);
 
         walletInfo = WalletInfo.external(
             id: WalletBase.idFor(name, type),
@@ -222,8 +203,10 @@ void main() async {
       walletBase = wallet as MoneroWalletBase;
       //print("${walletBase?.seed}");
 
-      expect(walletInfo.address,
-          '4AeRgkWZsMJhAWKMeCZ3h4ZSPnAcW5VBtRFyLd6gBEf6GgJU2FHXDA6i1DnQTd6h8R3VU5AkbGcWSNhtSwNNPgaD48gp4nn'); // TODO test generation of seed in official monero wallet ... which ... we ... should be using, right?
+      expect(
+          walletInfo.address,
+          mainnetTestData[
+              'address']); // TODO test generation of seed in official monero wallet ... which ... we ... should be using, right?
     });
   });
 }
