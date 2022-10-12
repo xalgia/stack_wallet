@@ -87,6 +87,8 @@ void main() async {
         // name = await generateName();
         // }
         String name = "namee${Random().nextInt(10000000)}";
+        int nettype = 2;
+        dynamic type = WalletType.moneroStageNet;
         final dirPath =
             await pathForWalletDir(name: name, type: WalletType.moneroStageNet);
         final path =
@@ -104,15 +106,16 @@ void main() async {
         );
 
         walletInfo = WalletInfo.external(
-            id: WalletBase.idFor(name, WalletType.monero),
+            id: WalletBase.idFor(name, type),
             name: name,
-            type: WalletType.monero,
+            type: type,
             isRecovery: false,
             restoreHeight: credentials.height ?? 0,
             date: DateTime.now(),
             path: path,
             address: "",
-            dirPath: dirPath);
+            dirPath: dirPath,
+            nettype: nettype);
         credentials.walletInfo = walletInfo;
 
         _walletCreationService = WalletCreationService(
@@ -124,7 +127,7 @@ void main() async {
         _walletCreationService.changeWalletType();
         final wallet = await
             // _walletCreationService.create(credentials);
-            _walletCreationService.restoreFromSeed(credentials);
+            _walletCreationService.restoreFromSeed(credentials, nettype);
         walletInfo.address = wallet.walletAddresses.address;
         print(walletInfo.address);
 
