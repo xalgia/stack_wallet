@@ -32,10 +32,12 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:stackwallet/utilities/flutter_secure_storage_interface.dart';
 
 import 'dart:developer' as developer;
 
-FlutterSecureStorage? storage;
+//FlutterSecureStorage? storage;
+FakeSecureStorage? storage;
 WalletService? walletService;
 SharedPreferences? prefs;
 KeyService? keysStorage;
@@ -74,7 +76,7 @@ void main() async {
       final _walletInfoSource =
           await Hive.openBox<WalletInfo>(WalletInfo.boxName);
       walletService = monero.createMoneroWalletService(_walletInfoSource);
-      storage = FlutterSecureStorage();
+      storage = FakeSecureStorage();
       prefs = await SharedPreferences.getInstance();
       keysStorage = KeyService(storage!);
       WalletInfo walletInfo;
@@ -101,9 +103,9 @@ void main() async {
         );
 
         walletInfo = WalletInfo.external(
-            id: WalletBase.idFor(name, WalletType.wownero),
+            id: WalletBase.idFor(name, WalletType.monero),
             name: name,
-            type: WalletType.wownero,
+            type: WalletType.monero,
             isRecovery: false,
             restoreHeight: credentials.height ?? 0,
             date: DateTime.now(),
