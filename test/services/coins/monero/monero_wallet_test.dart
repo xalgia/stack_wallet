@@ -102,7 +102,7 @@ void main() async {
             //     name: name, language: "English");
             // restoring a previous wallet
             monero.createMoneroRestoreWalletFromSeedCredentials(
-                name: name, height: 2580000, mnemonic: testMnemonic);
+                name: name, height: 1199000, mnemonic: testMnemonic);
 
         walletInfo = WalletInfo.external(
             id: WalletBase.idFor(name, type),
