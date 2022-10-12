@@ -1,122 +1,81 @@
+import 'dart:async';
+import 'dart:core';
+import 'dart:core' as core;
 import 'dart:io';
-import 'dart:io' show Directory;
-import 'package:decimal/decimal.dart';
+import 'dart:math';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_test/hive_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:stackwallet/services/coins/monero/monero_wallet.dart';
-import 'package:stackwallet/services/price.dart';
-import 'package:stackwallet/services/transaction_notification_tracker.dart';
-import 'package:stackwallet/utilities/enums/coin_enum.dart';
+
+import 'package:cw_core/monero_amount_format.dart';
+import 'package:cw_core/node.dart';
+import 'package:cw_core/pending_transaction.dart';
+import 'package:cw_core/unspent_coins_info.dart';
 import 'package:cw_core/wallet_base.dart';
 import 'package:cw_core/wallet_credentials.dart';
 import 'package:cw_core/wallet_info.dart';
 import 'package:cw_core/wallet_service.dart';
 import 'package:cw_core/wallet_type.dart';
-import 'package:flutter/foundation.dart';
+import 'package:cw_monero/api/wallet.dart';
+import 'package:cw_monero/pending_monero_transaction.dart';
+import 'package:cw_monero/monero_wallet.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_libmonero/core/key_service.dart';
 import 'package:flutter_libmonero/core/wallet_creation_service.dart';
+import 'package:flutter_libmonero/view_model/send/output.dart';
 import 'package:flutter_libmonero/monero/monero.dart';
-import 'package:flutter_libmonero/view_model/send/output.dart' as monero_output;
-import 'package:stackwallet/hive/db.dart';
-import 'package:stackwallet/utilities/flutter_secure_storage_interface.dart';
-import 'package:tuple/tuple.dart';
-
-import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'dart:developer' as developer;
+
+FlutterSecureStorage? storage;
+WalletService? walletService;
+SharedPreferences? prefs;
+KeyService? keysStorage;
+MoneroWalletBase? walletBase;
+late WalletCreationService _walletCreationService;
 
 @GenerateMocks([])
-void main() {
-  group("Validate stagenet address", () {
-    MoneroWallet? wallet;
-    FakeSecureStorage? storage;
-    WalletService? walletService;
-    dynamic _walletInfoSource;
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  Directory appDir = (await getApplicationDocumentsDirectory());
+  if (Platform.isIOS) {
+    appDir = (await getLibraryDirectory());
+  }
+  await Hive.close();
+  Hive.init(appDir.path);
 
-    const name = 'validateAddressStageNet';
-    const type = WalletType.moneroStageNet;
-    const nettype = 2;
+  // if (!Hive.isAdapterRegistered(Node.typeId)) {
+  Hive.registerAdapter(NodeAdapter());
+  // }
 
-    WalletCredentials credentials;
-    credentials = monero.createMoneroNewWalletCredentials(
-      name: name,
-      language: 'English',
-    );
-    dynamic result;
+  // if (!Hive.isAdapterRegistered(WalletInfo.typeId)) {
+  Hive.registerAdapter(WalletInfoAdapter());
+  // }
 
-    setUp(() async {
-      wallet = MoneroWallet(
-        walletId: 'validateAddressStageNet',
-        walletName: 'validateAddressStageNet',
-        coin: Coin.moneroStageNet,
-        // tracker: tracker,
-      );
+  // if (!Hive.isAdapterRegistered(WalletType.)) {
+  Hive.registerAdapter(WalletTypeAdapter());
+  // }
 
-      var dirPath;
-      final _dirPath =
-          await wallet?.pathForWalletDir(name: name, type: type); // TODO test
-      if (_dirPath != null) {
-        dirPath = _dirPath;
-      }
-      var path;
-      final _path =
-          await wallet?.pathForWallet(name: name, type: type); // TODO test
-      if (_path != null) {
-        path = _dirPath;
-      }
+  // if (!Hive.isAdapterRegistered(UnspentCoinsInfo.typeId)) {
+  Hive.registerAdapter(UnspentCoinsInfoAdapter());
+  // }
 
-      WalletInfo walletInfo;
-      walletInfo = WalletInfo.external(
-          //id: WalletBase.idFor(name, type),
-          id: '${walletTypeToString(type).toLowerCase()}_$name',
-          name: name,
-          type: type,
-          isRecovery: false,
-          restoreHeight: 0,
-          date: DateTime.now(),
-          path: path,
-          dirPath: dirPath,
-          // TODO: find out what to put for address
-          address: ''); // TODO test
-      credentials.walletInfo = walletInfo;
-
-      // We shouldn't be testing storage because results may vary by platform
-      Directory appDir = (await getApplicationDocumentsDirectory());
-      if (Platform.isIOS) {
-        appDir = (await getLibraryDirectory());
-      }
-      await Hive.close();
-      Hive.init(appDir.path);
-
-      _walletInfoSource = await Hive.openBox<WalletInfo>(WalletInfo.boxName);
-      // walletService = monero.createMoneroWalletService(DB.instance.moneroWalletInfoBox);
-      walletService = monero.createMoneroWalletService(_walletInfoSource);
-
-      result = await walletService!.create(credentials, nettype: nettype);
-
-      /*
-      WalletCreationService? _walletCreationService;
-      _walletCreationService = WalletCreationService(
-        secureStorage: storage,
-        sharedPreferences: prefs,
-        walletService: walletService,
-        keyService: keysStorage,
-          ); // TODO test
-      _walletCreationService.changeWalletType(); // TODO test
-
-      walletBase =
-          wallet as MoneroWalletBase; // Error: 'MoneroWalletBase' isn't a type.
-       */
-    });
-
-    test("Test 0", () async {
-      print('Test 0');
-      print(result);
-    });
-  });
+  monero.onStartup();
+  final _walletInfoSource = await Hive.openBox<WalletInfo>(WalletInfo.boxName);
+  walletService = monero.createMoneroWalletService(_walletInfoSource);
+  storage = FlutterSecureStorage();
+  prefs = await SharedPreferences.getInstance();
+  keysStorage = KeyService(storage!);
+  WalletInfo walletInfo;
+  late WalletCredentials credentials;
 
   group("Test 1", () {
     setUp(() async {});
