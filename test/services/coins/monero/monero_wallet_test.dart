@@ -43,56 +43,69 @@ SharedPreferences? prefs;
 KeyService? keysStorage;
 MoneroWalletBase? walletBase;
 late WalletCreationService _walletCreationService;
+dynamic _walletInfoSource;
+
+String name = '';
+int nettype = 0;
+dynamic type = WalletType.monero;
 
 @GenerateMocks([])
 void main() async {
-  group("Test 1", () {
+  storage = FakeSecureStorage();
+  prefs = await SharedPreferences.getInstance();
+  keysStorage = KeyService(storage!);
+  WalletInfo walletInfo = WalletInfo.external(
+      id: '',
+      name: '',
+      type: type,
+      isRecovery: false,
+      restoreHeight: 0,
+      date: DateTime.now(),
+      path: '',
+      address: '',
+      dirPath: '',
+      nettype: 0);
+  late WalletCredentials credentials;
+
+  WidgetsFlutterBinding.ensureInitialized();
+  Directory appDir = (await getApplicationDocumentsDirectory());
+  if (Platform.isIOS) {
+    appDir = (await getLibraryDirectory());
+  }
+  await Hive.close();
+  Hive.init(appDir.path);
+
+  // if (!Hive.isAdapterRegistered(Node.typeId)) {
+  Hive.registerAdapter(NodeAdapter());
+  // }
+
+  // if (!Hive.isAdapterRegistered(WalletInfo.typeId)) {
+  Hive.registerAdapter(WalletInfoAdapter());
+  // }
+
+  // if (!Hive.isAdapterRegistered(WalletType.)) {
+  Hive.registerAdapter(WalletTypeAdapter());
+  // }
+
+  // if (!Hive.isAdapterRegistered(UnspentCoinsInfo.typeId)) {
+  Hive.registerAdapter(UnspentCoinsInfoAdapter());
+  // }
+
+  monero.onStartup();
+  _walletInfoSource = await Hive.openBox<WalletInfo>(WalletInfo.boxName);
+  walletService = monero.createMoneroWalletService(_walletInfoSource);
+
+  group("Stagenet tests", () {
     setUp(() async {
-      WidgetsFlutterBinding.ensureInitialized();
-      Directory appDir = (await getApplicationDocumentsDirectory());
-      if (Platform.isIOS) {
-        appDir = (await getLibraryDirectory());
-      }
-      await Hive.close();
-      Hive.init(appDir.path);
-
-      // if (!Hive.isAdapterRegistered(Node.typeId)) {
-      Hive.registerAdapter(NodeAdapter());
-      // }
-
-      // if (!Hive.isAdapterRegistered(WalletInfo.typeId)) {
-      Hive.registerAdapter(WalletInfoAdapter());
-      // }
-
-      // if (!Hive.isAdapterRegistered(WalletType.)) {
-      Hive.registerAdapter(WalletTypeAdapter());
-      // }
-
-      // if (!Hive.isAdapterRegistered(UnspentCoinsInfo.typeId)) {
-      Hive.registerAdapter(UnspentCoinsInfoAdapter());
-      // }
-
-      monero.onStartup();
-      final _walletInfoSource =
-          await Hive.openBox<WalletInfo>(WalletInfo.boxName);
-      walletService = monero.createMoneroWalletService(_walletInfoSource);
-      storage = FakeSecureStorage();
-      prefs = await SharedPreferences.getInstance();
-      keysStorage = KeyService(storage!);
-      WalletInfo walletInfo;
-      late WalletCredentials credentials;
-
       try {
         // if (name?.isEmpty ?? true) {
         // name = await generateName();
         // }
-        String name = "namee${Random().nextInt(10000000)}";
-        int nettype = 2;
-        dynamic type = WalletType.moneroStageNet;
-        final dirPath =
-            await pathForWalletDir(name: name, type: WalletType.moneroStageNet);
-        final path =
-            await pathForWallet(name: name, type: WalletType.moneroStageNet);
+        name = "namee${Random().nextInt(10000000)}";
+        type = WalletType.moneroStageNet;
+        nettype = 2;
+        final dirPath = await pathForWalletDir(name: name, type: type);
+        final path = await pathForWallet(name: name, type: type);
         credentials =
             // //     creating a new wallet
             // monero.createMoneroNewWalletCredentials(
@@ -102,7 +115,7 @@ void main() async {
           name: name,
           height: 2580000,
           mnemonic:
-              "agreed aquarium wallets uptight karate wonders afoot guys itself nucleus reduce lamb fully fewest bimonthly dazed skulls magically mocked fugitive imbalance saga calamity dialect itself",
+              'agreed aquarium wallets uptight karate wonders afoot guys itself nucleus reduce lamb fully fewest bimonthly dazed skulls magically mocked fugitive imbalance saga calamity dialect itself',
         );
 
         walletInfo = WalletInfo.external(
@@ -125,24 +138,92 @@ void main() async {
           keyService: keysStorage,
         );
         _walletCreationService.changeWalletType();
-        final wallet = await
-            // _walletCreationService.create(credentials);
-            _walletCreationService.restoreFromSeed(credentials, nettype);
-        walletInfo.address = wallet.walletAddresses.address;
-        print(walletInfo.address);
-
-        await _walletInfoSource.add(walletInfo);
-        walletBase?.close();
-        walletBase = wallet as MoneroWalletBase;
-        print("${walletBase?.seed}");
       } catch (e, s) {
         print(e);
         print(s);
       }
     });
 
-    test("Test 1", () async {
-      print('Test 1');
+    test("Test stagenet address generation from seed", () async {
+      final wallet = await
+          // _walletCreationService.create(credentials);
+          _walletCreationService.restoreFromSeed(credentials, nettype);
+      walletInfo.address = wallet.walletAddresses.address;
+      //print(walletInfo.address);
+
+      await _walletInfoSource.add(walletInfo);
+      walletBase?.close();
+      walletBase = wallet as MoneroWalletBase;
+      //print("${walletBase?.seed}");
+
+      expect(walletInfo.address,
+          '5ArTmbRXWxQhAWKMeCZ3h4ZSPnAcW5VBtRFyLd6gBEf6GgJU2FHXDA6i1DnQTd6h8R3VU5AkbGcWSNhtSwNNPgaD49oStD5');
+    });
+  });
+
+  group("Mainnet tests", () {
+    setUp(() async {
+      try {
+        // if (name?.isEmpty ?? true) {
+        // name = await generateName();
+        // }
+        name = "namee${Random().nextInt(10000000)}";
+        type = WalletType.monero;
+        nettype = 0;
+        final dirPath = await pathForWalletDir(name: name, type: type);
+        final path = await pathForWallet(name: name, type: type);
+        credentials =
+            // //     creating a new wallet
+            // monero.createMoneroNewWalletCredentials(
+            //     name: name, language: "English");
+            // restoring a previous wallet
+            monero.createMoneroRestoreWalletFromSeedCredentials(
+          name: name,
+          height: 2580000,
+          mnemonic:
+              'agreed aquarium wallets uptight karate wonders afoot guys itself nucleus reduce lamb fully fewest bimonthly dazed skulls magically mocked fugitive imbalance saga calamity dialect itself',
+        );
+
+        walletInfo = WalletInfo.external(
+            id: WalletBase.idFor(name, type),
+            name: name,
+            type: type,
+            isRecovery: false,
+            restoreHeight: credentials.height ?? 0,
+            date: DateTime.now(),
+            path: path,
+            address: "",
+            dirPath: dirPath,
+            nettype: nettype);
+        credentials.walletInfo = walletInfo;
+
+        _walletCreationService = WalletCreationService(
+          secureStorage: storage,
+          sharedPreferences: prefs,
+          walletService: walletService,
+          keyService: keysStorage,
+        );
+        _walletCreationService.changeWalletType();
+      } catch (e, s) {
+        print(e);
+        print(s);
+      }
+    });
+
+    test("Test mainnet address generation from seed", () async {
+      final wallet = await
+          // _walletCreationService.create(credentials);
+          _walletCreationService.restoreFromSeed(credentials, nettype);
+      walletInfo.address = wallet.walletAddresses.address;
+      //print(walletInfo.address);
+
+      await _walletInfoSource.add(walletInfo);
+      walletBase?.close();
+      walletBase = wallet as MoneroWalletBase;
+      //print("${walletBase?.seed}");
+
+      expect(walletInfo.address,
+          '4AeRgkWZsMJhAWKMeCZ3h4ZSPnAcW5VBtRFyLd6gBEf6GgJU2FHXDA6i1DnQTd6h8R3VU5AkbGcWSNhtSwNNPgaD48gp4nn'); // TODO test generation of seed in official monero wallet ... which ... we ... should be using, right?
     });
   });
 }
