@@ -98,8 +98,9 @@ void main() async {
             // restoring a previous wallet
             monero.createMoneroRestoreWalletFromSeedCredentials(
           name: name,
-          // height: 2580000,
-          mnemonic: "",
+          height: 2580000,
+          mnemonic:
+              "agreed aquarium wallets uptight karate wonders afoot guys itself nucleus reduce lamb fully fewest bimonthly dazed skulls magically mocked fugitive imbalance saga calamity dialect itself",
         );
 
         walletInfo = WalletInfo.external(
@@ -121,12 +122,9 @@ void main() async {
           keyService: keysStorage,
         );
         _walletCreationService.changeWalletType();
-        // To restore from a seed
         final wallet = await
             // _walletCreationService.create(credentials);
             _walletCreationService.restoreFromSeed(credentials);
-        // to create a new wallet
-        // final wallet = await process(credentials);
         walletInfo.address = wallet.walletAddresses.address;
         print(walletInfo.address);
 
