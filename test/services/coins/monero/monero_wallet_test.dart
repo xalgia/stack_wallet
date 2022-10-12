@@ -142,7 +142,19 @@ void main() async {
       walletBase = wallet as MoneroWalletBase;
       //print("${walletBase?.seed}");
 
-      expect(walletInfo.address, stagenetTestData['address']);
+      expect(walletInfo.address, stagenetTestData[0][0]);
+      expect(await walletBase!.getTransactionAddress(0, 0),
+          stagenetTestData[0][0]);
+      expect(await walletBase!.getTransactionAddress(0, 1),
+          stagenetTestData[0][1]);
+      expect(await walletBase!.getTransactionAddress(0, 2),
+          stagenetTestData[0][2]);
+      expect(await walletBase!.getTransactionAddress(1, 0),
+          stagenetTestData[1][0]);
+      expect(await walletBase!.getTransactionAddress(1, 1),
+          stagenetTestData[1][1]);
+      expect(await walletBase!.getTransactionAddress(1, 2),
+          stagenetTestData[1][2]);
     });
   });
 
@@ -203,12 +215,49 @@ void main() async {
       walletBase = wallet as MoneroWalletBase;
       //print("${walletBase?.seed}");
 
+      // print(walletBase);
+      // loggerPrint(walletBase.toString());
+      // loggerPrint("name: ${walletBase!.name}  seed: ${walletBase!.seed} id: "
+      //     "${walletBase!.id} walletinfo: ${toStringForinfo(walletBase!.walletInfo)} type: ${walletBase!.type} balance: "
+      //     "${walletBase!.balance.entries.first.value.available} currency: ${walletBase!.currency}");
+
+      expect(walletInfo.address, mainnetTestData[0][0]);
       expect(
-          walletInfo.address,
-          mainnetTestData[
-              'address']); // TODO test generation of seed in official monero wallet ... which ... we ... should be using, right?
+          await walletBase!.getTransactionAddress(0, 0), mainnetTestData[0][0]);
+      expect(
+          await walletBase!.getTransactionAddress(0, 1), mainnetTestData[0][1]);
+      expect(
+          await walletBase!.getTransactionAddress(0, 2), mainnetTestData[0][2]);
+      expect(
+          await walletBase!.getTransactionAddress(1, 0), mainnetTestData[1][0]);
+      expect(
+          await walletBase!.getTransactionAddress(1, 1), mainnetTestData[1][1]);
+      expect(
+          await walletBase!.getTransactionAddress(1, 2), mainnetTestData[1][2]);
     });
   });
+  /*
+  group("Mainnet node tests", () {
+    test("Test mainnet node connection", () async {
+      await walletBase?.connectToNode(
+          node: Node(
+              uri: "monero-stagenet.stackwallet.com:38081",
+              type: WalletType.moneroStageNet));
+      await walletBase!.rescan(
+          height:
+              credentials.height); // Probably shouldn't be rescanning from 0...
+      await walletBase!.getNodeHeight();
+      int height = await walletBase!.getNodeHeight();
+      print('height: $height');
+      bool connected = await walletBase!.isConnected();
+      print('connected: $connected');
+
+      //expect...
+    });
+  });
+   */
+
+  // TODO test deletion of wallets ... and delete them
 }
 
 Future<String> pathForWalletDir(
