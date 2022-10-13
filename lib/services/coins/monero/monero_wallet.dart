@@ -351,6 +351,11 @@ class MoneroWallet extends CoinServiceAPI {
         int _currentHeight = await currentNodeHeight;
         double progress = 0;
         try {
+          if (walletBase == null) {
+            throw Exception(
+                "Called startSyncPercentTimer() when walletBase existed but now it doesn't!");
+          }
+
           progress = walletBase!.syncStatus!.progress();
         } catch (e, s) {
           Logging.instance.log("$e $s", level: LogLevel.Warning);
@@ -447,6 +452,9 @@ class MoneroWallet extends CoinServiceAPI {
         if (walletBase == null) {
           throw Exception(
               "Called refresh() when walletBase existed but now it doesn't!");
+        } else if (walletBase!.syncStatus == null) {
+          throw Exception(
+              "Called startSyncPercentTimer() but syncStatus doesn't exist on walletBase!");
         }
 
         progress = (walletBase!.syncStatus!).progress();
