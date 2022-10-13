@@ -152,6 +152,11 @@ class MoneroWallet extends CoinServiceAPI {
     } catch (e, s) {}
     int _height = -1;
     try {
+      if (walletBase == null) {
+        throw Exception(
+            "Called currentNodeHeight() when walletBase existed but now it doesn't! (1/2)");
+      }
+
       _height = (walletBase!.syncStatus as SyncingSyncStatus).height;
     } catch (e, s) {
       Logging.instance.log("$e $s", level: LogLevel.Warning);
@@ -160,6 +165,11 @@ class MoneroWallet extends CoinServiceAPI {
     int blocksRemaining = -1;
 
     try {
+      if (walletBase == null) {
+        throw Exception(
+            "Called currentNodeHeight() when walletBase existed but now it doesn't! (2/2");
+      }
+
       blocksRemaining =
           (walletBase!.syncStatus as SyncingSyncStatus).blocksLeft;
     } catch (e, s) {
@@ -194,6 +204,11 @@ class MoneroWallet extends CoinServiceAPI {
     } catch (e, s) {}
     int syncingHeight = -1;
     try {
+      if (walletBase == null) {
+        throw Exception(
+            "Called currentSyncingHeight() when walletBase existed but now it doesn't!");
+      }
+
       syncingHeight = (walletBase!.syncStatus as SyncingSyncStatus).height;
     } catch (e, s) {
       Logging.instance.log("$e $s", level: LogLevel.Warning);
@@ -248,6 +263,11 @@ class MoneroWallet extends CoinServiceAPI {
 
   Future<void> _checkReceivingAddressForTransactions() async {
     try {
+      if (walletBase == null) {
+        throw Exception(
+            "Called checkReceivingAddressForTransaction() when walletBase didn't exist!");
+      }
+
       int highestIndex = -1;
       for (var element
           in walletBase!.transactionHistory!.transactions!.entries) {
@@ -417,6 +437,11 @@ class MoneroWallet extends CoinServiceAPI {
 
       double progress = 0;
       try {
+        if (walletBase == null) {
+          throw Exception(
+              "Called refresh() when walletBase existed but now it doesn't!");
+        }
+
         progress = (walletBase!.syncStatus!).progress();
       } catch (e, s) {
         Logging.instance.log("$e $s", level: LogLevel.Warning);
