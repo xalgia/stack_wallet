@@ -761,11 +761,10 @@ class MoneroWallet extends CoinServiceAPI {
         walletService: walletService,
         keyService: keysStorage,
       );
-      _walletCreationService?.changeWalletType();
+      _walletCreationService?.changeWalletType(nettype);
       // To restore from a seed
 
-      final wallet =
-          await _walletCreationService?.create(credentials, nettype: nettype);
+      final wallet = await _walletCreationService?.create(credentials, nettype);
 
       await _secureStore.write(
           key: '${_walletId}_mnemonic', value: wallet?.seed.trim());
@@ -984,12 +983,12 @@ class MoneroWallet extends CoinServiceAPI {
 
   // TODO: take in a dynamic height
   @override
-  Future<void> recoverFromMnemonic({
-    required String mnemonic,
-    required int maxUnusedAddressGap,
-    required int maxNumberOfIndexesToCheck,
-    required int height,
-  }) async {
+  Future<void> recoverFromMnemonic(
+      {required String mnemonic,
+      required int maxUnusedAddressGap,
+      required int maxNumberOfIndexesToCheck,
+      required int height,
+      int nettype = 0}) async {
     await _prefs.init();
     longMutex = true;
     final start = DateTime.now();
@@ -1020,6 +1019,13 @@ class MoneroWallet extends CoinServiceAPI {
       await DB.instance
           .put<dynamic>(boxName: walletId, key: "restoreHeight", value: height);
 
+      WalletType type = WalletType.monero;
+      if (nettype == 1) {
+        type = WalletType.moneroTestNet;
+      } else if (nettype == 2) {
+        type = WalletType.moneroStageNet;
+      }
+
       storage = const FlutterSecureStorage();
       walletService =
           monero.createMoneroWalletService(DB.instance.moneroWalletInfoBox);
@@ -1028,9 +1034,8 @@ class MoneroWallet extends CoinServiceAPI {
       WalletInfo walletInfo;
       WalletCredentials credentials;
       String name = _walletId;
-      final dirPath =
-          await pathForWalletDir(name: name, type: WalletType.monero);
-      final path = await pathForWallet(name: name, type: WalletType.monero);
+      final dirPath = await pathForWalletDir(name: name, type: type);
+      final path = await pathForWallet(name: name, type: type);
       credentials = monero.createMoneroRestoreWalletFromSeedCredentials(
         name: name,
         height: height,
@@ -1038,16 +1043,17 @@ class MoneroWallet extends CoinServiceAPI {
       );
       try {
         walletInfo = WalletInfo.external(
-            id: WalletBase.idFor(name, WalletType.monero),
+            id: WalletBase.idFor(name, type),
             name: name,
-            type: WalletType.monero,
+            type: type,
             isRecovery: false,
             restoreHeight: credentials.height ?? 0,
             date: DateTime.now(),
             path: path,
             dirPath: dirPath,
             // TODO: find out what to put for address
-            address: '');
+            address: '',
+            nettype: nettype);
         credentials.walletInfo = walletInfo;
 
         _walletCreationService = WalletCreationService(
@@ -1056,7 +1062,7 @@ class MoneroWallet extends CoinServiceAPI {
           walletService: walletService,
           keyService: keysStorage,
         );
-        _walletCreationService!.changeWalletType();
+        _walletCreationService!.changeWalletType(nettype);
         // To restore from a seed
         final wallet =
             await _walletCreationService!.restoreFromSeed(credentials);
@@ -1094,7 +1100,7 @@ class MoneroWallet extends CoinServiceAPI {
       final node = await getCurrentNode();
       final host = Uri.parse(node.host).host;
       await walletBase?.connectToNode(
-          node: Node(uri: "$host:${node.port}", type: WalletType.monero));
+          node: Node(uri: "$host:${node.port}", type: type));
       await walletBase?.rescan(height: credentials.height);
     } catch (e, s) {
       Logging.instance.log(
