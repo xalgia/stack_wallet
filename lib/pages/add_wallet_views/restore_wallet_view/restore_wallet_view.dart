@@ -199,8 +199,20 @@ class _RestoreWalletViewState extends ConsumerState<RestoreWalletView> {
       }
 
       // TODO: do actual check to make sure it is a valid mnemonic for monero
+      print(bip39.validateMnemonic(mnemonic));
+      print((widget.coin == Coin.monero ||
+          widget.coin == Coin.wownero ||
+          widget.coin == Coin.moneroStageNet ||
+          widget.coin == Coin.moneroTestNet));
+      print(widget.coin == Coin.monero);
+      print(widget.coin == Coin.wownero);
+      print(widget.coin == Coin.moneroStageNet);
+      print(widget.coin == Coin.moneroTestNet);
       if (bip39.validateMnemonic(mnemonic) == false &&
-          !(widget.coin == Coin.monero || widget.coin == Coin.wownero)) {
+          !(widget.coin == Coin.monero ||
+              widget.coin == Coin.wownero ||
+              widget.coin == Coin.moneroStageNet ||
+              widget.coin == Coin.moneroTestNet)) {
         unawaited(showFloatingFlushBar(
           type: FlushBarType.warning,
           message: "Invalid seed phrase!",
