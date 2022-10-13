@@ -690,7 +690,7 @@ class MoneroWallet extends CoinServiceAPI {
     }
 
     int nettype = 0;
-    var type = WalletType.monero;
+    WalletType type = WalletType.monero;
 
     if (names[_walletId]['coin'] == 'moneroStageNet') {
       nettype = 2;
