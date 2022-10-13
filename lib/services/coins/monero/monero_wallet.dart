@@ -119,8 +119,15 @@ class MoneroWallet extends CoinServiceAPI {
     final node = await getCurrentNode();
 
     final host = Uri.parse(node.host).host;
+
+    WalletType type = WalletType.monero;
+    if (nettype == 1) {
+      type = WalletType.moneroTestNet;
+    } else if (nettype == 2) {
+      type = WalletType.moneroStageNet;
+    }
     await walletBase?.connectToNode(
-        node: Node(uri: "$host:${node.port}", type: WalletType.monero));
+        node: Node(uri: "$host:${node.port}", type: type));
 
     // TODO: is this sync call needed? Do we need to notify ui here?
     await walletBase?.startSync();
@@ -1230,8 +1237,23 @@ class MoneroWallet extends CoinServiceAPI {
           if (!(await walletBase!.isConnected())) {
             final node = await getCurrentNode();
             final host = Uri.parse(node.host).host;
+
+            WalletType? type = WalletType.monero;
+            /*
+            if (nettype == 1) {
+              type = WalletType.moneroTestNet;
+            } else if (nettype == 2) {
+              type = WalletType.moneroStageNet;
+            }
+             */
+            if (walletBase?.type == WalletType.moneroTestNet) {
+              type = WalletType.moneroTestNet;
+            } else if (walletBase?.type == WalletType.moneroStageNet) {
+              type = WalletType.moneroStageNet;
+            }
+
             await walletBase?.connectToNode(
-                node: Node(uri: "$host:${node.port}", type: WalletType.monero));
+                node: Node(uri: "$host:${node.port}", type: type));
             await walletBase?.startSync();
           }
           await refresh();

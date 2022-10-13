@@ -51,7 +51,7 @@ dynamic _walletInfoSource;
 
 String name = '';
 int nettype = 0;
-dynamic type = WalletType.monero;
+WalletType type = WalletType.monero;
 
 @GenerateMocks([])
 void main() async {

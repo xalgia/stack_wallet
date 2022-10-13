@@ -151,7 +151,9 @@ class _RestoreWalletViewState extends ConsumerState<RestoreWalletView> {
 
   bool _isValidMnemonicWord(String word) {
     // TODO: get the actual language
-    if (widget.coin == Coin.monero) {
+    if (widget.coin == Coin.monero ||
+        widget.coin == Coin.moneroTestNet ||
+        widget.coin == Coin.moneroStageNet) {
       var moneroWordList = monero.getMoneroWordList("English");
       return moneroWordList.contains(word);
     }
@@ -178,7 +180,9 @@ class _RestoreWalletViewState extends ConsumerState<RestoreWalletView> {
 
       int height = 0;
 
-      if (widget.coin == Coin.monero) {
+      if (widget.coin == Coin.monero ||
+          widget.coin == Coin.moneroTestNet ||
+          widget.coin == Coin.moneroStageNet) {
         height = monero.getHeigthByDate(date: widget.restoreFromDate);
       }
 

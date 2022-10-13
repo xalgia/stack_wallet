@@ -251,7 +251,10 @@ class _RestoreOptionsViewState extends ConsumerState<RestoreOptionsView> {
               SizedBox(
                 height: isDesktop ? 40 : 24,
               ),
-              if (coin == Coin.monero || coin == Coin.epicCash)
+              if (coin == Coin.monero ||
+                  coin == Coin.moneroTestNet ||
+                  coin == Coin.moneroStageNet ||
+                  coin == Coin.epicCash)
                 Text(
                   "Choose start date",
                   style: isDesktop
@@ -263,11 +266,17 @@ class _RestoreOptionsViewState extends ConsumerState<RestoreOptionsView> {
                       : STextStyles.smallMed12(context),
                   textAlign: TextAlign.left,
                 ),
-              if (coin == Coin.monero || coin == Coin.epicCash)
+              if (coin == Coin.monero ||
+                  coin == Coin.moneroTestNet ||
+                  coin == Coin.moneroStageNet ||
+                  coin == Coin.epicCash)
                 SizedBox(
                   height: isDesktop ? 16 : 8,
                 ),
-              if (coin == Coin.monero || coin == Coin.epicCash)
+              if (coin == Coin.monero ||
+                  coin == Coin.moneroTestNet ||
+                  coin == Coin.moneroStageNet ||
+                  coin == Coin.epicCash)
 
                 // if (!isDesktop)
                 RestoreFromDatePicker(
@@ -276,11 +285,17 @@ class _RestoreOptionsViewState extends ConsumerState<RestoreOptionsView> {
 
               // if (isDesktop)
               //   // TODO desktop date picker
-              if (coin == Coin.monero || coin == Coin.epicCash)
+              if (coin == Coin.monero ||
+                  coin == Coin.moneroTestNet ||
+                  coin == Coin.moneroStageNet ||
+                  coin == Coin.epicCash)
                 const SizedBox(
                   height: 8,
                 ),
-              if (coin == Coin.monero || coin == Coin.epicCash)
+              if (coin == Coin.monero ||
+                  coin == Coin.moneroTestNet ||
+                  coin == Coin.moneroStageNet ||
+                  coin == Coin.epicCash)
                 RoundedWhiteContainer(
                   child: Center(
                     child: Text(
@@ -297,7 +312,10 @@ class _RestoreOptionsViewState extends ConsumerState<RestoreOptionsView> {
                     ),
                   ),
                 ),
-              if (coin == Coin.monero || coin == Coin.epicCash)
+              if (coin == Coin.monero ||
+                  coin == Coin.moneroTestNet ||
+                  coin == Coin.moneroStageNet ||
+                  coin == Coin.epicCash)
                 SizedBox(
                   height: isDesktop ? 24 : 16,
                 ),
