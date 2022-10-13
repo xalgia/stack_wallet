@@ -1398,8 +1398,8 @@ class MoneroWallet extends CoinServiceAPI {
   @override
   bool get isFavorite {
     try {
-      return DB.instance.get<dynamic>(boxName: walletId, key: "isFavorite")
-          as bool;
+      return DB.instance.get<dynamic>(boxName: walletId, key: "isFavorite") ??
+          false as bool;
     } catch (e, s) {
       Logging.instance
           .log("isFavorite fetch failed: $e\n$s", level: LogLevel.Error);
