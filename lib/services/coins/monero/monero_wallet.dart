@@ -159,11 +159,6 @@ class MoneroWallet extends CoinServiceAPI {
     } catch (e, s) {}
     int _height = -1;
     try {
-      if (walletBase == null) {
-        throw Exception(
-            "Called currentNodeHeight() when walletBase existed but now it doesn't! (1/2)");
-      }
-
       _height = (walletBase!.syncStatus as SyncingSyncStatus).height;
     } catch (e, s) {
       Logging.instance.log("$e $s", level: LogLevel.Warning);
@@ -172,11 +167,6 @@ class MoneroWallet extends CoinServiceAPI {
     int blocksRemaining = -1;
 
     try {
-      if (walletBase == null) {
-        throw Exception(
-            "Called currentNodeHeight() when walletBase existed but now it doesn't! (2/2");
-      }
-
       blocksRemaining =
           (walletBase!.syncStatus as SyncingSyncStatus).blocksLeft;
     } catch (e, s) {
@@ -211,11 +201,6 @@ class MoneroWallet extends CoinServiceAPI {
     } catch (e, s) {}
     int syncingHeight = -1;
     try {
-      if (walletBase == null) {
-        throw Exception(
-            "Called currentSyncingHeight() when walletBase existed but now it doesn't!");
-      }
-
       syncingHeight = (walletBase!.syncStatus as SyncingSyncStatus).height;
     } catch (e, s) {
       Logging.instance.log("$e $s", level: LogLevel.Warning);
@@ -270,11 +255,6 @@ class MoneroWallet extends CoinServiceAPI {
 
   Future<void> _checkReceivingAddressForTransactions() async {
     try {
-      if (walletBase == null) {
-        throw Exception(
-            "Called checkReceivingAddressForTransaction() when walletBase didn't exist!");
-      }
-
       int highestIndex = -1;
       for (var element
           in walletBase!.transactionHistory!.transactions!.entries) {
@@ -351,11 +331,6 @@ class MoneroWallet extends CoinServiceAPI {
         int _currentHeight = await currentNodeHeight;
         double progress = 0;
         try {
-          if (walletBase == null) {
-            throw Exception(
-                "Called startSyncPercentTimer() when walletBase existed but now it doesn't!");
-          }
-
           progress = walletBase!.syncStatus!.progress();
         } catch (e, s) {
           Logging.instance.log("$e $s", level: LogLevel.Warning);
@@ -429,10 +404,6 @@ class MoneroWallet extends CoinServiceAPI {
       refreshMutex = true;
     }
 
-    if (walletBase == null) {
-      throw Exception("Tried to call refresh() in monero without walletBase!");
-    }
-
     try {
       await startSyncPercentTimer();
       GlobalEventBus.instance.fire(
@@ -449,14 +420,6 @@ class MoneroWallet extends CoinServiceAPI {
 
       double progress = 0;
       try {
-        if (walletBase == null) {
-          throw Exception(
-              "Called refresh() when walletBase existed but now it doesn't!");
-        } else if (walletBase!.syncStatus == null) {
-          throw Exception(
-              "Called startSyncPercentTimer() but syncStatus doesn't exist on walletBase!");
-        }
-
         progress = (walletBase!.syncStatus!).progress();
       } catch (e, s) {
         Logging.instance.log("$e $s", level: LogLevel.Warning);
