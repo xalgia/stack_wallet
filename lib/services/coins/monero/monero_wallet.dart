@@ -1209,7 +1209,7 @@ class MoneroWallet extends CoinServiceAPI {
             final node = await getCurrentNode();
             final host = Uri.parse(node.host).host;
 
-            WalletType? type = WalletType.monero;
+            WalletType type = WalletType.monero;
             /*
             if (nettype == 1) {
               type = WalletType.moneroTestNet;
