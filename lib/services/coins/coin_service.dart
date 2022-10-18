@@ -170,6 +170,22 @@ abstract class CoinServiceAPI {
           // tracker: tracker,
         );
 
+      case Coin.wowneroTestNet:
+        return WowneroWallet(
+          walletId: walletId,
+          walletName: walletName,
+          coin: coin,
+          // tracker: tracker,
+        );
+
+      case Coin.wowneroStageNet:
+        return WowneroWallet(
+          walletId: walletId,
+          walletName: walletName,
+          coin: coin,
+          // tracker: tracker,
+        );
+
       case Coin.namecoin:
         return NamecoinWallet(
           walletId: walletId,

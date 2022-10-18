@@ -30,7 +30,9 @@ enum Coin {
   dogecoinTestNet,
   firoTestNet,
   moneroTestNet,
-  moneroStageNet
+  moneroStageNet,
+  wowneroTestNet,
+  wowneroStageNet
 }
 
 // remove firotestnet for now
@@ -52,11 +54,15 @@ extension CoinExt on Coin {
       case Coin.monero:
         return "Monero";
       case Coin.moneroTestNet:
-        return "Monero Testnet";
+        return "tMonero";
       case Coin.moneroStageNet:
-        return "Monero Stagenet";
+        return "sMonero";
       case Coin.wownero:
         return "Wownero";
+      case Coin.wowneroTestNet:
+        return "tWownero";
+      case Coin.wowneroStageNet:
+        return "sWownero";
       case Coin.namecoin:
         return "Namecoin";
       case Coin.bitcoinTestNet:
@@ -90,6 +96,10 @@ extension CoinExt on Coin {
         return "sXMR";
       case Coin.wownero:
         return "WOW";
+      case Coin.wowneroTestNet:
+        return "tWOW";
+      case Coin.wowneroStageNet:
+        return "sWOW";
       case Coin.namecoin:
         return "NMC";
       case Coin.bitcoinTestNet:
@@ -121,6 +131,8 @@ extension CoinExt on Coin {
       case Coin.moneroStageNet:
         return "monero";
       case Coin.wownero:
+      case Coin.wowneroTestNet:
+      case Coin.wowneroStageNet:
         return "wownero";
       case Coin.namecoin:
         return "namecoin";
@@ -153,6 +165,8 @@ extension CoinExt on Coin {
       case Coin.moneroTestNet:
       case Coin.moneroStageNet:
       case Coin.wownero:
+      case Coin.wowneroTestNet:
+      case Coin.wowneroStageNet:
         return false;
     }
   }
@@ -184,6 +198,8 @@ extension CoinExt on Coin {
         return xmr.MINIMUM_CONFIRMATIONS;
 
       case Coin.wownero:
+      case Coin.wowneroTestNet:
+      case Coin.wowneroStageNet:
         return wow.MINIMUM_CONFIRMATIONS;
 
       case Coin.namecoin:
@@ -226,9 +242,20 @@ Coin coinFromPrettyName(String name) {
     case "smonero":
       return Coin.moneroStageNet;
     case "Wownero":
-    case "tWownero":
     case "wownero":
       return Coin.wownero;
+    case "Wownero Testnet":
+    case "wownero testnet":
+    case "wowneroTestNet":
+    case "tWownero":
+    case "twownero":
+      return Coin.wowneroTestNet;
+    case "Wownero Stagenet":
+    case "wownero stagenet":
+    case "wowneroStageNet":
+    case "sWownero":
+    case "swownero":
+      return Coin.wowneroStageNet;
     case "Namecoin":
     case "namecoin":
       return Coin.namecoin;
@@ -274,6 +301,10 @@ Coin coinFromTickerCaseInsensitive(String ticker) {
       return Coin.moneroStageNet;
     case "wow":
       return Coin.wownero;
+    case "twow":
+      return Coin.wowneroTestNet;
+    case "swow":
+      return Coin.wowneroStageNet;
     case "nmc":
       return Coin.namecoin;
     case "tbtc":

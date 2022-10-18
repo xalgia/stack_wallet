@@ -24,6 +24,10 @@ Uri getBlockExplorerTransactionUrlFor({
       return Uri.parse("https://stagenet.xmrchain.net/tx/$txid");
     case Coin.wownero:
       return Uri.parse("https://explore.wownero.com/search?value=$txid");
+    case Coin.wowneroTestNet: // TODO find/serve tWOW node
+      return Uri.parse("https://testnet.wownero.com/search?value=$txid");
+    case Coin.wowneroStageNet: // TODO find/serve sWOW node
+      return Uri.parse("https://stagenet.wownero.com/search?value=$txid");
     case Coin.firo:
       return Uri.parse("https://explorer.firo.org/tx/$txid");
     case Coin.firoTestNet:

@@ -207,7 +207,9 @@ class _RestoreWalletViewState extends ConsumerState<RestoreWalletView> {
           !(widget.coin == Coin.monero ||
               widget.coin == Coin.moneroTestNet ||
               widget.coin == Coin.moneroStageNet ||
-              widget.coin == Coin.wownero)) {
+              widget.coin == Coin.wownero ||
+              widget.coin == Coin.wowneroTestNet ||
+              widget.coin == Coin.wowneroStageNet)) {
         unawaited(showFloatingFlushBar(
           type: FlushBarType.warning,
           message: "Invalid seed phrase!",

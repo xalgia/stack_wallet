@@ -172,6 +172,8 @@ class _SVG {
       case Coin.moneroStageNet:
         return monero;
       case Coin.wownero:
+      case Coin.wowneroTestNet:
+      case Coin.wowneroStageNet:
         return wownero;
       case Coin.namecoin:
         return namecoin;
@@ -223,6 +225,8 @@ class _PNG {
       case Coin.moneroStageNet:
         return monero;
       case Coin.wownero:
+      case Coin.wowneroTestNet:
+      case Coin.wowneroStageNet:
         return wownero;
       case Coin.namecoin:
         return namecoin;

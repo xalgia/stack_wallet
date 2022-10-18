@@ -757,7 +757,9 @@ class _TransactionSearchViewState
             .floor()
             .toBigInt()
             .toInt();
-      } else if (widget.coin == Coin.wownero) {
+      } else if (widget.coin == Coin.wownero ||
+          widget.coin == Coin.wowneroTestNet ||
+          widget.coin == Coin.wowneroStageNet) {
         amount = (amountDecimal * Decimal.fromInt(Constants.satsPerCoinWownero))
             .floor()
             .toBigInt()

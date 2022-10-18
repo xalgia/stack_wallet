@@ -60,6 +60,8 @@ abstract class Constants {
         values.addAll([25]);
         break;
       case Coin.wownero:
+      case Coin.wowneroTestNet:
+      case Coin.wowneroStageNet:
         values.addAll([14]);
         break;
     }
@@ -92,6 +94,8 @@ abstract class Constants {
       case Coin.moneroTestNet:
       case Coin.moneroStageNet:
       case Coin.wownero:
+      case Coin.wowneroTestNet:
+      case Coin.wowneroStageNet:
         return 120;
 
       case Coin.namecoin:

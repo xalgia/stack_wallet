@@ -218,6 +218,8 @@ class _WalletNetworkSettingsViewState
         coin == Coin.moneroTestNet ||
         coin == Coin.moneroStageNet ||
         coin == Coin.wownero ||
+        coin == Coin.wowneroTestNet ||
+        coin == Coin.wowneroStageNet ||
         coin == Coin.epicCash) {
       _blocksRemainingSubscription = eventBus.on<BlocksRemainingEvent>().listen(
         (event) async {
@@ -286,7 +288,9 @@ class _WalletNetworkSettingsViewState
       if (_percent < highestPercent) {
         _percent = highestPercent.clamp(0.0, 1.0);
       }
-    } else if (coin == Coin.wownero) {
+    } else if (coin == Coin.wownero ||
+        coin == Coin.wowneroTestNet ||
+        coin == Coin.wowneroStageNet) {
       double highestPercent = (ref
               .read(walletsChangeNotifierProvider)
               .getManager(widget.walletId)
@@ -572,6 +576,8 @@ class _WalletNetworkSettingsViewState
                                             coin == Coin.moneroTestNet ||
                                             coin == Coin.moneroStageNet ||
                                             coin == Coin.wownero ||
+                                            coin == Coin.wowneroTestNet ||
+                                            coin == Coin.wowneroStageNet ||
                                             coin == Coin.epicCash)
                                           Text(
                                             " (Blocks to go: ${_blocksRemaining == -1 ? "?" : _blocksRemaining})",

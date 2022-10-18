@@ -369,7 +369,9 @@ class WalletsService extends ChangeNotifier {
     await DB.instance.delete<dynamic>(
         boxName: DB.boxNameAllWalletsData,
         key: "${walletId}_mnemonicHasBeenVerified");
-    if (coinFromPrettyName(shell['coin'] as String) == Coin.wownero) {
+    if (coinFromPrettyName(shell['coin'] as String) == Coin.wownero ||
+        coinFromPrettyName(shell['coin'] as String) == Coin.wowneroTestNet ||
+        coinFromPrettyName(shell['coin'] as String) == Coin.wowneroStageNet) {
       final wowService =
           wownero.createWowneroWalletService(DB.instance.moneroWalletInfoBox);
       await wowService.remove(walletId, nettype);

@@ -61,7 +61,9 @@ class _NewWalletRecoveryPhraseWarningViewState
             coin == Coin.moneroTestNet ||
             coin == Coin.moneroStageNet)
         ? Constants.seedPhraseWordCountMonero
-        : coin == Coin.wownero
+        : (coin == Coin.wownero ||
+                coin == Coin.wowneroTestNet ||
+                coin == Coin.wowneroStageNet)
             ? 14
             : Constants.seedPhraseWordCountBip39;
 

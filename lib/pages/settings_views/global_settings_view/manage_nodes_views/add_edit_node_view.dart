@@ -93,6 +93,8 @@ class _AddEditNodeViewState extends ConsumerState<AddEditNodeView> {
       case Coin.moneroTestNet:
       case Coin.moneroStageNet:
       case Coin.wownero:
+      case Coin.wowneroTestNet:
+      case Coin.wowneroStageNet:
         try {
           final uri = Uri.parse(formData.host!);
           if (uri.scheme.startsWith("http")) {
@@ -390,6 +392,8 @@ class _AddEditNodeViewState extends ConsumerState<AddEditNodeView> {
                                       coin == Coin.moneroTestNet ||
                                       coin == Coin.moneroStageNet ||
                                       coin == Coin.wownero ||
+                                      coin == Coin.wowneroTestNet ||
+                                      coin == Coin.wowneroStageNet ||
                                       coin == Coin.epicCash) {
                                     if (address.startsWith("http")) {
                                       final uri = Uri.parse(address);
@@ -548,6 +552,8 @@ class _NodeFormState extends ConsumerState<NodeForm> {
       case Coin.moneroTestNet:
       case Coin.moneroStageNet:
       case Coin.wownero:
+      case Coin.wowneroTestNet:
+      case Coin.wowneroStageNet:
         return true;
     }
   }
@@ -712,6 +718,8 @@ class _NodeFormState extends ConsumerState<NodeForm> {
                             widget.coin != Coin.moneroTestNet &&
                             widget.coin != Coin.moneroStageNet &&
                             widget.coin != Coin.wownero &&
+                            widget.coin != Coin.wowneroTestNet &&
+                            widget.coin != Coin.wowneroStageNet &&
                             widget.coin != Coin.epicCash)
                         ? "IP address"
                         : "Url",
@@ -897,6 +905,8 @@ class _NodeFormState extends ConsumerState<NodeForm> {
             widget.coin != Coin.moneroTestNet &&
             widget.coin != Coin.moneroStageNet &&
             widget.coin != Coin.wownero &&
+            widget.coin != Coin.wowneroTestNet &&
+            widget.coin != Coin.wowneroStageNet &&
             widget.coin != Coin.epicCash)
           Row(
             children: [
@@ -952,6 +962,8 @@ class _NodeFormState extends ConsumerState<NodeForm> {
             widget.coin != Coin.moneroTestNet &&
             widget.coin != Coin.moneroStageNet &&
             widget.coin != Coin.wownero &&
+            widget.coin != Coin.wowneroTestNet &&
+            widget.coin != Coin.wowneroStageNet &&
             widget.coin != Coin.epicCash)
           const SizedBox(
             height: 8,
@@ -960,6 +972,8 @@ class _NodeFormState extends ConsumerState<NodeForm> {
             widget.coin != Coin.moneroTestNet &&
             widget.coin != Coin.moneroStageNet &&
             widget.coin != Coin.wownero &&
+            widget.coin != Coin.wowneroTestNet &&
+            widget.coin != Coin.wowneroStageNet &&
             widget.coin != Coin.epicCash)
           Row(
             children: [

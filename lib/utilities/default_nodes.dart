@@ -231,6 +231,12 @@ abstract class DefaultNodes {
       case Coin.wownero:
         return wownero;
 
+      case Coin.wowneroTestNet:
+        return wowneroTestNet;
+
+      case Coin.wowneroStageNet:
+        return wowneroStageNet;
+
       case Coin.namecoin:
         return namecoin;
 

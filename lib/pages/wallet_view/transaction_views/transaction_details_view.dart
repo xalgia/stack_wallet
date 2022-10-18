@@ -243,7 +243,7 @@ class _TransactionDetailsViewState
                                       coin == Coin.moneroTestNet ||
                                       coin == Coin.moneroStageNet)
                                   ? (amount / 10000.toDecimal()).toDecimal()
-                                  : coin == Coin.wownero
+                                  : (coin == Coin.wownero coin == Coin.wowneroTestNet || coin == Coin.wowneroStageNet)
                                       ? (amount / 1000.toDecimal()).toDecimal()
                                       : amount,
                               locale: ref.watch(
@@ -258,7 +258,7 @@ class _TransactionDetailsViewState
                             height: 2,
                           ),
                           SelectableText(
-                            "${Format.localizedStringAsFixed(value: ((coin == Coin.monero || coin == Coin.moneroTestNet || coin == Coin.moneroStageNet) ? (amount / 10000.toDecimal()).toDecimal() : coin == Coin.wownero ? (amount / 1000.toDecimal()).toDecimal() : amount) * ref.watch(priceAnd24hChangeNotifierProvider.select((value) => value.getPrice(coin).item1)), locale: ref.watch(
+                            "${Format.localizedStringAsFixed(value: ((coin == Coin.monero || coin == Coin.moneroTestNet || coin == Coin.moneroStageNet) ? (amount / 10000.toDecimal()).toDecimal() : (coin == Coin.wownero || coin == Coin.wowneroTestNet || coin == Coin.wowneroStageNet) ? (amount / 1000.toDecimal()).toDecimal() : amount) * ref.watch(priceAnd24hChangeNotifierProvider.select((value) => value.getPrice(coin).item1)), locale: ref.watch(
                                   localeServiceChangeNotifierProvider
                                       .select((value) => value.locale),
                                 ), decimalPlaces: 2)} ${ref.watch(
@@ -305,7 +305,9 @@ class _TransactionDetailsViewState
                 if (!((coin == Coin.monero ||
                             coin == Coin.moneroTestNet ||
                             coin == Coin.moneroStageNet ||
-                            coin == Coin.wownero) &&
+                            coin == Coin.wownero ||
+                            coin == Coin.wowneroTestNet ||
+                            coin == Coin.wowneroStageNet) &&
                         _transaction.txType.toLowerCase() == "sent") &&
                     !((coin == Coin.firo || coin == Coin.firoTestNet) &&
                         _transaction.subType == "mint"))
@@ -315,7 +317,9 @@ class _TransactionDetailsViewState
                 if (!((coin == Coin.monero ||
                             coin == Coin.moneroTestNet ||
                             coin == Coin.moneroStageNet ||
-                            coin == Coin.wownero) &&
+                            coin == Coin.wownero ||
+                            coin == Coin.wowneroTestNet ||
+                            coin == Coin.wowneroStageNet) &&
                         _transaction.txType.toLowerCase() == "sent") &&
                     !((coin == Coin.firo || coin == Coin.firoTestNet) &&
                         _transaction.subType == "mint"))
@@ -476,7 +480,9 @@ class _TransactionDetailsViewState
                                             coin == Coin.moneroTestNet ||
                                             coin == Coin.moneroStageNet)
                                         ? (fee / 10000.toDecimal()).toDecimal()
-                                        : coin == Coin.wownero
+                                        : (coin == Coin.wownero ||
+                                           coin == Coin.wowneroTestNet ||
+                                           coin == Coin.wowneroStageNet)
                                             ? (fee / 1000.toDecimal())
                                                 .toDecimal()
                                             : fee,
@@ -490,7 +496,9 @@ class _TransactionDetailsViewState
                                         coin == Coin.moneroTestNet ||
                                         coin == Coin.moneroStageNet)
                                     ? (fee / 10000.toDecimal()).toDecimal()
-                                    : coin == Coin.wownero
+                                    : (coin == Coin.wownero ||
+                                       coin == Coin.wowneroTestNet ||
+                                       coin == Coin.wowneroStageNet)
                                         ? (fee / 1000.toDecimal()).toDecimal()
                                         : fee,
                                 locale: ref.watch(

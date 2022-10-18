@@ -121,7 +121,7 @@ class WowneroWallet extends CoinServiceAPI {
 
     final host = Uri.parse(node.host).host;
     await walletBase?.connectToNode(
-        node: Node(uri: "$host:${node.port}", type: WalletType.wownero));
+        node: Node(uri: "$host:${node.port}", type: type));
 
     // TODO: is this sync call needed? Do we need to notify ui here?
     await walletBase?.startSync();
@@ -680,22 +680,23 @@ class WowneroWallet extends CoinServiceAPI {
     WalletInfo walletInfo;
     WalletCredentials credentials;
 
-    int nettype = 0;
+    int nettype = getNettype();
+    WalletType type = getWalletType();
 
     try {
       String name = _walletId;
       final dirPath =
-          await pathForWalletDir(name: name, type: WalletType.wownero);
-      final path = await pathForWallet(name: name, type: WalletType.wownero);
+          await pathForWalletDir(name: name, type: type);
+      final path = await pathForWallet(name: name, type: type);
       credentials = wownero.createWowneroNewWalletCredentials(
         name: name,
         language: "English",
       );
 
       walletInfo = WalletInfo.external(
-          id: WalletBase.idFor(name, WalletType.wownero),
+          id: WalletBase.idFor(name, type),
           name: name,
-          type: WalletType.wownero,
+          type: type,
           isRecovery: false,
           restoreHeight: credentials.height ?? 0,
           date: DateTime.now(),
@@ -737,7 +738,7 @@ class WowneroWallet extends CoinServiceAPI {
     final node = await getCurrentNode();
     final host = Uri.parse(node.host).host;
     await walletBase?.connectToNode(
-        node: Node(uri: "$host:${node.port}", type: WalletType.wownero));
+        node: Node(uri: "$host:${node.port}", type: type));
     await walletBase?.startSync();
     await DB.instance
         .put<dynamic>(boxName: walletId, key: "id", value: _walletId);
@@ -821,7 +822,7 @@ class WowneroWallet extends CoinServiceAPI {
     //
     // await walletBase?.connectToNode(
     //     node: Node(
-    //         uri: "xmr-node.cakewallet.com:18081", type: WalletType.wownero));
+    //         uri: "xmr-node.cakewallet.com:18081", type: type));
     // walletBase?.startSync();
 
     return true;
@@ -887,27 +888,23 @@ class WowneroWallet extends CoinServiceAPI {
   }
 
   int getNettype() {
-    //if (coin == Coin.wownero) {
-    return 0;
-    /*
+    if (coin == Coin.wownero) {
+      return 0;
     } else if (coin == Coin.wowneroTestNet) {
       return 1;
     } else {
       return 2;
     }
-    */
   }
 
   WalletType getWalletType() {
-    //if (coin == Coin.wownero) {
-    return WalletType.wownero;
-    /*
+    if (coin == Coin.wownero) {
+    return type;
     } else if (coin == Coin.wowneroTestNet) {
-      return WalletType.wowneroTestNet;
+      return typeTestNet;
     } else {
-      return WalletType.wowneroStageNet;
+      return typeStageNet;
     }
-    */
   }
 
   @override
@@ -1017,8 +1014,8 @@ class WowneroWallet extends CoinServiceAPI {
       WalletCredentials credentials;
       String name = _walletId;
       final dirPath =
-          await pathForWalletDir(name: name, type: WalletType.wownero);
-      final path = await pathForWallet(name: name, type: WalletType.wownero);
+          await pathForWalletDir(name: name, type: type);
+      final path = await pathForWallet(name: name, type: type);
       credentials = wownero.createWowneroRestoreWalletFromSeedCredentials(
         name: name,
         height: height,
@@ -1028,9 +1025,9 @@ class WowneroWallet extends CoinServiceAPI {
         int nettype = 0;
 
         walletInfo = WalletInfo.external(
-            id: WalletBase.idFor(name, WalletType.wownero),
+            id: WalletBase.idFor(name, type),
             name: name,
-            type: WalletType.wownero,
+            type: type,
             isRecovery: false,
             restoreHeight: credentials.height ?? 0,
             date: DateTime.now(),
@@ -1084,7 +1081,7 @@ class WowneroWallet extends CoinServiceAPI {
       final node = await getCurrentNode();
       final host = Uri.parse(node.host).host;
       await walletBase?.connectToNode(
-          node: Node(uri: "$host:${node.port}", type: WalletType.wownero));
+          node: Node(uri: "$host:${node.port}", type: type));
       await walletBase?.rescan(height: credentials.height);
     } catch (e, s) {
       Logging.instance.log(
@@ -1216,7 +1213,7 @@ class WowneroWallet extends CoinServiceAPI {
             final host = Uri.parse(node.host).host;
             await walletBase?.connectToNode(
                 node:
-                    Node(uri: "$host:${node.port}", type: WalletType.wownero));
+                    Node(uri: "$host:${node.port}", type: type));
             await walletBase?.startSync();
           }
           await refresh();

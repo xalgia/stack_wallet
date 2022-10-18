@@ -174,7 +174,9 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
                                           coin == Coin.moneroTestNet ||
                                           coin == Coin.moneroStageNet)
                                       ? (_transaction.amount ~/ 10000)
-                                      : coin == Coin.wownero
+                                      : (coin == Coin.wownero ||
+                                              coin == Coin.wowneroTestNet ||
+                                              coin == Coin.wowneroStageNet)
                                           ? (_transaction.amount ~/ 1000)
                                           : _transaction.amount;
                                   return Text(
@@ -218,7 +220,9 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
                                       coin == Coin.moneroTestNet ||
                                       coin == Coin.moneroStageNet) {
                                     value = (value ~/ 10000);
-                                  } else if (coin == Coin.wownero) {
+                                  } else if (coin == Coin.wownero ||
+                                      coin == Coin.wowneroTestNet ||
+                                      coin == Coin.wowneroStageNet) {
                                     value = (value ~/ 1000);
                                   }
 

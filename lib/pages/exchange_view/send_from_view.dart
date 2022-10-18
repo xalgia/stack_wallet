@@ -66,6 +66,8 @@ class _SendFromViewState extends ConsumerState<SendFromView> {
       case Coin.moneroStageNet:
         return amount.toStringAsFixed(Constants.decimalPlacesMonero);
       case Coin.wownero:
+      case Coin.wowneroTestNet:
+      case Coin.wowneroStageNet:
         return amount.toStringAsFixed(Constants.decimalPlacesWownero);
     }
   }
@@ -336,7 +338,9 @@ class _SendFromCardState extends ConsumerState<SendFromCard> {
                                     coin == Coin.moneroTestNet ||
                                     coin == Coin.moneroStageNet)
                                 ? Constants.decimalPlacesMonero
-                                : coin == Coin.wownero
+                                : (coin == Coin.wownero ||
+                                        coin == Coin.wowneroTestNet ||
+                                        coin == Coin.wowneroStageNet)
                                     ? Constants.decimalPlacesWownero
                                     : Constants.decimalPlaces,
                           )} ${coin.ticker}",
