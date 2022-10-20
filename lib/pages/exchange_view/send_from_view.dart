@@ -332,7 +332,9 @@ class _SendFromCardState extends ConsumerState<SendFromCard> {
                           "${Format.localizedStringAsFixed(
                             value: snapshot.data!,
                             locale: locale,
-                            decimalPlaces: coin == Coin.monero
+                            decimalPlaces: (coin == Coin.monero ||
+                                    coin == Coin.moneroTestNet ||
+                                    coin == Coin.moneroStageNet)
                                 ? Constants.decimalPlacesMonero
                                 : coin == Coin.wownero
                                     ? Constants.decimalPlacesWownero
