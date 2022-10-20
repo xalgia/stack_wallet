@@ -12,6 +12,8 @@ abstract class DefaultNodes {
         dogecoin,
         firo,
         monero,
+        moneroTestNet,
+        moneroStageNet,
         epicCash,
         bitcoincash,
         namecoin,
