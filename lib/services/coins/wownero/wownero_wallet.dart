@@ -857,7 +857,7 @@ class WowneroWallet extends CoinServiceAPI {
       debugPrint("Exception was thrown $e $s");
       throw Exception("Password not found $e, $s");
     }
-    walletBase = (await walletService?.openWallet(_walletId, password!))
+    walletBase = (await walletService?.openWallet(_walletId, password!, 0))
         as WowneroWalletBase;
     debugPrint("walletBase $walletBase");
     Logging.instance.log(
@@ -1173,8 +1173,8 @@ class WowneroWallet extends CoinServiceAPI {
             debugPrint("Exception was thrown $e $s");
             throw Exception("Password not found $e, $s");
           }
-          walletBase = (await walletService?.openWallet(_walletId, password!))
-              as WowneroWalletBase?;
+          walletBase = (await walletService?.openWallet(
+              _walletId, password!, 0)) as WowneroWalletBase?;
           if (!(await walletBase!.isConnected())) {
             final node = await getCurrentNode();
             final host = Uri.parse(node.host).host;
