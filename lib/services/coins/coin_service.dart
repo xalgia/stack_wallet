@@ -139,7 +139,21 @@ abstract class CoinServiceAPI {
         );
 
       case Coin.monero:
+        return MoneroWallet(
+          walletId: walletId,
+          walletName: walletName,
+          coin: coin,
+          // tracker: tracker,
+        );
+
       case Coin.moneroTestNet:
+        return MoneroWallet(
+          walletId: walletId,
+          walletName: walletName,
+          coin: coin,
+          // tracker: tracker,
+        );
+
       case Coin.moneroStageNet:
         return MoneroWallet(
           walletId: walletId,

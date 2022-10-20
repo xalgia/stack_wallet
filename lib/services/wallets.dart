@@ -186,10 +186,10 @@ class Wallets extends ChangeNotifier {
         Logging.instance.log(
             "LOADING WALLET: ${entry.value.toString()} IS VERIFIED: $isVerified",
             level: LogLevel.Info);
+        final coin = entry.value.coin;
         if (isVerified) {
           if (_managerMap[walletId] == null &&
               _managerProviderMap[walletId] == null) {
-            final coin = entry.value.coin;
             NodeModel node = nodeService.getPrimaryNodeFor(coin: coin) ??
                 DefaultNodes.getNodeFor(coin);
             // ElectrumXNode? node = await nodeService.getCurrentNode(coin: coin);
@@ -223,7 +223,10 @@ class Wallets extends ChangeNotifier {
             final shouldSetAutoSync = shouldAutoSyncAll ||
                 walletIdsToEnableAutoSync.contains(manager.walletId);
 
-            if (manager.coin == Coin.monero || manager.coin == Coin.wownero) {
+            if (manager.coin == Coin.monero ||
+                manager.coin == Coin.moneroTestNet ||
+                manager.coin == Coin.moneroStageNet ||
+                manager.coin == Coin.wownero) {
               walletsToInitLinearly.add(Tuple2(manager, shouldSetAutoSync));
             } else {
               walletInitFutures.add(manager.initializeExisting().then((value) {
@@ -254,6 +257,7 @@ class Wallets extends ChangeNotifier {
           }
         } else {
           // wallet creation was not completed by user so we remove it completely
+
           await walletsService.deleteWallet(entry.value.name, false);
         }
       } catch (e, s) {
@@ -312,7 +316,10 @@ class Wallets extends ChangeNotifier {
           final shouldSetAutoSync = shouldAutoSyncAll ||
               walletIdsToEnableAutoSync.contains(manager.walletId);
 
-          if (manager.coin == Coin.monero || manager.coin == Coin.wownero) {
+          if (manager.coin == Coin.monero ||
+              manager.coin == Coin.moneroTestNet ||
+              manager.coin == Coin.moneroStageNet ||
+              manager.coin == Coin.wownero) {
             walletsToInitLinearly.add(Tuple2(manager, shouldSetAutoSync));
           } else {
             walletInitFutures.add(manager.initializeExisting().then((value) {
@@ -343,6 +350,7 @@ class Wallets extends ChangeNotifier {
         }
       } else {
         // wallet creation was not completed by user so we remove it completely
+
         await walletsService.deleteWallet(manager.walletName, false);
       }
     }
