@@ -120,7 +120,7 @@ class MoneroWallet extends CoinServiceAPI {
 
     final host = Uri.parse(node.host).host;
     await walletBase?.connectToNode(
-        node: Node(uri: "$host:${node.port}", type: WalletType.monero));
+        node: Node(uri: "$host:${node.port}", type: getWalletType()));
 
     // TODO: is this sync call needed? Do we need to notify ui here?
     await walletBase?.startSync();
@@ -679,13 +679,10 @@ class MoneroWallet extends CoinServiceAPI {
     WalletCredentials credentials;
     try {
       String name = _walletId;
-      final dirPath =
-          await pathForWalletDir(name: name, type: WalletType.monero);
-      final path = await pathForWallet(name: name, type: WalletType.monero);
+      final dirPath = await pathForWalletDir(name: name, type: getWalletType());
+      final path = await pathForWallet(name: name, type: getWalletType());
       credentials = monero.createMoneroNewWalletCredentials(
-        name: name,
-        language: "English",
-      );
+          name: name, language: "English", nettype: getNettype());
 
       // subtract a couple days to ensure we have a buffer for SWB
       final bufferedCreateHeight = monero.getHeigthByDate(
@@ -695,9 +692,9 @@ class MoneroWallet extends CoinServiceAPI {
           boxName: walletId, key: "restoreHeight", value: bufferedCreateHeight);
 
       walletInfo = WalletInfo.external(
-          id: WalletBase.idFor(name, WalletType.monero),
+          id: WalletBase.idFor(name, getWalletType()),
           name: name,
-          type: WalletType.monero,
+          type: getWalletType(),
           isRecovery: false,
           restoreHeight: credentials.height ?? 0,
           date: DateTime.now(),
@@ -731,7 +728,7 @@ class MoneroWallet extends CoinServiceAPI {
     final node = await getCurrentNode();
     final host = Uri.parse(node.host).host;
     await walletBase?.connectToNode(
-        node: Node(uri: "$host:${node.port}", type: WalletType.monero));
+        node: Node(uri: "$host:${node.port}", type: getWalletType()));
     await walletBase?.startSync();
     await DB.instance
         .put<dynamic>(boxName: walletId, key: "id", value: _walletId);
@@ -815,7 +812,7 @@ class MoneroWallet extends CoinServiceAPI {
     //
     // await walletBase?.connectToNode(
     //     node: Node(
-    //         uri: "xmr-node.cakewallet.com:18081", type: WalletType.monero));
+    //         uri: "xmr-node.cakewallet.com:18081", type: getWalletType()));
     // walletBase?.startSync();
 
     return true;
@@ -978,19 +975,18 @@ class MoneroWallet extends CoinServiceAPI {
       WalletInfo walletInfo;
       WalletCredentials credentials;
       String name = _walletId;
-      final dirPath =
-          await pathForWalletDir(name: name, type: WalletType.monero);
-      final path = await pathForWallet(name: name, type: WalletType.monero);
+      final dirPath = await pathForWalletDir(name: name, type: getWalletType());
+      final path = await pathForWallet(name: name, type: getWalletType());
       credentials = monero.createMoneroRestoreWalletFromSeedCredentials(
-        name: name,
-        height: height,
-        mnemonic: mnemonic.trim(),
-      );
+          name: name,
+          height: height,
+          mnemonic: mnemonic.trim(),
+          nettype: getNettype());
       try {
         walletInfo = WalletInfo.external(
-            id: WalletBase.idFor(name, WalletType.monero),
+            id: WalletBase.idFor(name, getWalletType()),
             name: name,
-            type: WalletType.monero,
+            type: getWalletType(),
             isRecovery: false,
             restoreHeight: credentials.height ?? 0,
             date: DateTime.now(),
@@ -1044,7 +1040,7 @@ class MoneroWallet extends CoinServiceAPI {
       final node = await getCurrentNode();
       final host = Uri.parse(node.host).host;
       await walletBase?.connectToNode(
-          node: Node(uri: "$host:${node.port}", type: WalletType.monero));
+          node: Node(uri: "$host:${node.port}", type: getWalletType()));
       await walletBase?.rescan(height: credentials.height);
     } catch (e, s) {
       Logging.instance.log(
@@ -1175,7 +1171,7 @@ class MoneroWallet extends CoinServiceAPI {
             final node = await getCurrentNode();
             final host = Uri.parse(node.host).host;
             await walletBase?.connectToNode(
-                node: Node(uri: "$host:${node.port}", type: WalletType.monero));
+                node: Node(uri: "$host:${node.port}", type: getWalletType()));
             await walletBase?.startSync();
           }
           await refresh();
@@ -1592,6 +1588,28 @@ class MoneroWallet extends CoinServiceAPI {
           "Exception rethrown from generateNewAddress(): $e\n$s",
           level: LogLevel.Error);
       return false;
+    }
+  }
+
+  @override
+  int getNettype() {
+    if (coin == Coin.monero) {
+      return 0;
+    } else if (coin == Coin.moneroTestNet) {
+      return 1;
+    } else {
+      return 2;
+    }
+  }
+
+  @override
+  WalletType getWalletType() {
+    if (coin == Coin.monero) {
+      return WalletType.monero;
+    } else if (coin == Coin.moneroTestNet) {
+      return WalletType.moneroTestNet;
+    } else {
+      return WalletType.moneroStageNet;
     }
   }
 }

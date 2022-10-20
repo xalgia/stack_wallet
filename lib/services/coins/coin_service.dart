@@ -139,6 +139,8 @@ abstract class CoinServiceAPI {
         );
 
       case Coin.monero:
+      case Coin.moneroTestNet:
+      case Coin.moneroStageNet:
         return MoneroWallet(
           walletId: walletId,
           walletName: walletName,

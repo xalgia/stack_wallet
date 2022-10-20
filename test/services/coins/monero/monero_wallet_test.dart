@@ -97,8 +97,8 @@ void main() async {
       try {
         name =
             'namee${Random().nextInt(10000000)}'; // TODO set static name and handle mocked storage etc to not pollute wallet files
-        type = WalletType.moneroStageNet;
         nettype = 2;
+        type = WalletType.moneroStageNet;
         final dirPath = await pathForWalletDir(name: name, type: type);
         final path = await pathForWallet(name: name, type: type);
         credentials =
@@ -107,7 +107,10 @@ void main() async {
             //     name: name, language: "English");
             // restoring a previous wallet
             monero.createMoneroRestoreWalletFromSeedCredentials(
-                name: name, height: 1199000, mnemonic: testMnemonic);
+                name: name,
+                height: 1199000,
+                mnemonic: testMnemonic,
+                nettype: nettype);
 
         walletInfo = WalletInfo.external(
             id: WalletBase.idFor(name, type),
@@ -167,6 +170,7 @@ void main() async {
       try {
         name =
             'namee${Random().nextInt(10000000)}'; // TODO set static name and handle mocked storage etc to not pollute wallet files
+        nettype = 0;
         type = WalletType.monero;
         final dirPath = await pathForWalletDir(name: name, type: type);
         path = await pathForWallet(name: name, type: type);
@@ -176,7 +180,10 @@ void main() async {
             //     name: name, language: "English");
             // restoring a previous wallet
             monero.createMoneroRestoreWalletFromSeedCredentials(
-                name: name, height: 2580000, mnemonic: testMnemonic);
+                name: name,
+                height: 2580000,
+                mnemonic: testMnemonic,
+                nettype: nettype);
 
         walletInfo = WalletInfo.external(
             id: WalletBase.idFor(name, type),

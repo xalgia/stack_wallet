@@ -170,6 +170,36 @@ abstract class DefaultNodes {
         isDown: false,
       );
 
+  // TODO: eventually enable ssl and set scheme to https
+  // currently get certificate failure
+  static NodeModel get moneroTestNet => NodeModel(
+        host:
+            "http://monero-testnet.stackwallet.com", // can use http://node.sethforprivacy.com:28089 for development purposes until testnet node set up
+        port: 28081,
+        name: defaultName,
+        id: _nodeId(Coin.moneroTestNet),
+        useSSL: false,
+        enabled: true,
+        coinName: Coin.moneroTestNet.name,
+        isFailover: true,
+        isDown: false,
+      );
+
+  // TODO: eventually enable ssl and set scheme to https
+  // currently get certificate failure
+  static NodeModel get moneroStageNet => NodeModel(
+        host:
+            "http://monero-stagenet.stackwallet.com", // can use http://node.sethforprivacy.com:38089 for development purposes until stagenet node set up
+        port: 38081,
+        name: defaultName,
+        id: _nodeId(Coin.moneroStageNet),
+        useSSL: false,
+        enabled: true,
+        coinName: Coin.moneroStageNet.name,
+        isFailover: true,
+        isDown: false,
+      );
+
   static NodeModel getNodeFor(Coin coin) {
     switch (coin) {
       case Coin.bitcoin:
@@ -207,6 +237,12 @@ abstract class DefaultNodes {
 
       case Coin.dogecoinTestNet:
         return dogecoinTestnet;
+
+      case Coin.moneroTestNet:
+        return moneroTestNet;
+
+      case Coin.moneroStageNet:
+        return moneroStageNet;
     }
   }
 

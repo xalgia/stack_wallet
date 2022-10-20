@@ -206,6 +206,8 @@ class CoinThemeColor {
       case Coin.firoTestNet:
         return firo;
       case Coin.monero:
+      case Coin.moneroTestNet:
+      case Coin.moneroStageNet:
         return monero;
       case Coin.namecoin:
         return namecoin;

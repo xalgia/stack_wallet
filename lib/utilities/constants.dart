@@ -87,6 +87,8 @@ abstract class Constants {
         return 60;
 
       case Coin.monero:
+      case Coin.moneroTestNet:
+      case Coin.moneroStageNet:
         return 120;
 
       case Coin.wownero:
