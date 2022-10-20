@@ -120,7 +120,7 @@ class MoneroWallet extends CoinServiceAPI {
 
     final host = Uri.parse(node.host).host;
     await walletBase?.connectToNode(
-        node: Node(uri: "$host:${node.port}", type: getWalletType()));
+        node: Node(uri: "$host:${node.port}", type: WalletType.monero));
 
     // TODO: is this sync call needed? Do we need to notify ui here?
     await walletBase?.startSync();
@@ -679,8 +679,9 @@ class MoneroWallet extends CoinServiceAPI {
     WalletCredentials credentials;
     try {
       String name = _walletId;
-      final dirPath = await pathForWalletDir(name: name, type: getWalletType());
-      final path = await pathForWallet(name: name, type: getWalletType());
+      final dirPath =
+          await pathForWalletDir(name: name, type: WalletType.monero);
+      final path = await pathForWallet(name: name, type: WalletType.monero);
       credentials = monero.createMoneroNewWalletCredentials(
           name: name, language: "English", nettype: getNettype());
 
@@ -692,9 +693,9 @@ class MoneroWallet extends CoinServiceAPI {
           boxName: walletId, key: "restoreHeight", value: bufferedCreateHeight);
 
       walletInfo = WalletInfo.external(
-          id: WalletBase.idFor(name, getWalletType()),
+          id: WalletBase.idFor(name, WalletType.monero),
           name: name,
-          type: getWalletType(),
+          type: WalletType.monero,
           isRecovery: false,
           restoreHeight: credentials.height ?? 0,
           date: DateTime.now(),
@@ -728,7 +729,7 @@ class MoneroWallet extends CoinServiceAPI {
     final node = await getCurrentNode();
     final host = Uri.parse(node.host).host;
     await walletBase?.connectToNode(
-        node: Node(uri: "$host:${node.port}", type: getWalletType()));
+        node: Node(uri: "$host:${node.port}", type: WalletType.monero));
     await walletBase?.startSync();
     await DB.instance
         .put<dynamic>(boxName: walletId, key: "id", value: _walletId);
@@ -812,7 +813,7 @@ class MoneroWallet extends CoinServiceAPI {
     //
     // await walletBase?.connectToNode(
     //     node: Node(
-    //         uri: "xmr-node.cakewallet.com:18081", type: getWalletType()));
+    //         uri: "xmr-node.cakewallet.com:18081", type: WalletType.monero));
     // walletBase?.startSync();
 
     return true;
@@ -975,8 +976,9 @@ class MoneroWallet extends CoinServiceAPI {
       WalletInfo walletInfo;
       WalletCredentials credentials;
       String name = _walletId;
-      final dirPath = await pathForWalletDir(name: name, type: getWalletType());
-      final path = await pathForWallet(name: name, type: getWalletType());
+      final dirPath =
+          await pathForWalletDir(name: name, type: WalletType.monero);
+      final path = await pathForWallet(name: name, type: WalletType.monero);
       credentials = monero.createMoneroRestoreWalletFromSeedCredentials(
           name: name,
           height: height,
@@ -984,9 +986,9 @@ class MoneroWallet extends CoinServiceAPI {
           nettype: getNettype());
       try {
         walletInfo = WalletInfo.external(
-            id: WalletBase.idFor(name, getWalletType()),
+            id: WalletBase.idFor(name, WalletType.monero),
             name: name,
-            type: getWalletType(),
+            type: WalletType.monero,
             isRecovery: false,
             restoreHeight: credentials.height ?? 0,
             date: DateTime.now(),
@@ -1040,7 +1042,7 @@ class MoneroWallet extends CoinServiceAPI {
       final node = await getCurrentNode();
       final host = Uri.parse(node.host).host;
       await walletBase?.connectToNode(
-          node: Node(uri: "$host:${node.port}", type: getWalletType()));
+          node: Node(uri: "$host:${node.port}", type: WalletType.monero));
       await walletBase?.rescan(height: credentials.height);
     } catch (e, s) {
       Logging.instance.log(
@@ -1171,7 +1173,7 @@ class MoneroWallet extends CoinServiceAPI {
             final node = await getCurrentNode();
             final host = Uri.parse(node.host).host;
             await walletBase?.connectToNode(
-                node: Node(uri: "$host:${node.port}", type: getWalletType()));
+                node: Node(uri: "$host:${node.port}", type: WalletType.monero));
             await walletBase?.startSync();
           }
           await refresh();
@@ -1599,17 +1601,6 @@ class MoneroWallet extends CoinServiceAPI {
       return 1;
     } else {
       return 2;
-    }
-  }
-
-  @override
-  WalletType getWalletType() {
-    if (coin == Coin.monero) {
-      return WalletType.monero;
-    } else if (coin == Coin.moneroTestNet) {
-      return WalletType.moneroTestNet;
-    } else {
-      return WalletType.moneroStageNet;
     }
   }
 }

@@ -98,9 +98,9 @@ void main() async {
         name =
             'namee${Random().nextInt(10000000)}'; // TODO set static name and handle mocked storage etc to not pollute wallet files
         nettype = 2;
-        type = WalletType.moneroStageNet;
-        final dirPath = await pathForWalletDir(name: name, type: type);
-        final path = await pathForWallet(name: name, type: type);
+        final dirPath =
+            await pathForWalletDir(name: name, type: WalletType.monero);
+        final path = await pathForWallet(name: name, type: WalletType.monero);
         credentials =
             // //     creating a new wallet
             // monero.createMoneroNewWalletCredentials(
@@ -171,9 +171,9 @@ void main() async {
         name =
             'namee${Random().nextInt(10000000)}'; // TODO set static name and handle mocked storage etc to not pollute wallet files
         nettype = 0;
-        type = WalletType.monero;
-        final dirPath = await pathForWalletDir(name: name, type: type);
-        path = await pathForWallet(name: name, type: type);
+        final dirPath =
+            await pathForWalletDir(name: name, type: WalletType.monero);
+        path = await pathForWallet(name: name, type: WalletType.monero);
         credentials =
             // //     creating a new wallet
             // monero.createMoneroNewWalletCredentials(
