@@ -852,8 +852,15 @@ class MoneroWallet extends CoinServiceAPI {
       debugPrint("Exception was thrown $e $s");
       throw Exception("Password not found $e, $s");
     }
-    walletBase = (await walletService?.openWallet(_walletId, password!))
-        as MoneroWalletBase;
+    int nettype = 0;
+    if (coin == Coin.moneroTestNet) {
+      nettype = 1;
+    } else if (coin == Coin.moneroStageNet) {
+      nettype = 2;
+    }
+
+    walletBase = (await walletService?.openWallet(
+        _walletId, password!, nettype)) as MoneroWalletBase;
     debugPrint("walletBase $walletBase");
     Logging.instance.log(
         "Opened existing ${coin.prettyName} wallet $walletName",
@@ -1167,8 +1174,15 @@ class MoneroWallet extends CoinServiceAPI {
             debugPrint("Exception was thrown $e $s");
             throw Exception("Password not found $e, $s");
           }
-          walletBase = (await walletService?.openWallet(_walletId, password!))
-              as MoneroWalletBase?;
+
+          int nettype = 0;
+          if (coin == Coin.moneroTestNet) {
+            nettype = 1;
+          } else if (coin == Coin.moneroStageNet) {
+            nettype = 2;
+          }
+          walletBase = (await walletService?.openWallet(
+              _walletId, password!, nettype)) as MoneroWalletBase?;
           if (!(await walletBase!.isConnected())) {
             final node = await getCurrentNode();
             final host = Uri.parse(node.host).host;
